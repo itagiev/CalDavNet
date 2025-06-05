@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{617D70D5-410C-4687-A94E-2EECE8EE644C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalDavNet", "CalDavNet\CalDavNet.csproj", "{57F102DF-89D8-4177-A8E1-25CEA61E008B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{36D591C7-65C7-A0D1-1CBC-10CDE441BDC8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		global.json = global.json
+		NuGet.config = NuGet.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Debug|x64.Build.0 = Debug|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Debug|x86.Build.0 = Debug|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Release|x64.ActiveCfg = Release|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Release|x64.Build.0 = Release|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Release|x86.ActiveCfg = Release|Any CPU
+		{617D70D5-410C-4687-A94E-2EECE8EE644C}.Release|x86.Build.0 = Release|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Debug|x64.Build.0 = Debug|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Debug|x86.Build.0 = Debug|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Release|x64.ActiveCfg = Release|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Release|x64.Build.0 = Release|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Release|x86.ActiveCfg = Release|Any CPU
+		{57F102DF-89D8-4177-A8E1-25CEA61E008B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2C00C48B-BA04-47AA-8E6A-F74E9D995360}
+	EndGlobalSection
+EndGlobal

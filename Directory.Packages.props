@@ -1,0 +1,11 @@
+<!-- For more info on central package management go to https://devblogs.microsoft.com/nuget/introducing-central-package-management/ -->
+<Project>
+  <PropertyGroup>
+    <!-- Enable central package management, https://learn.microsoft.com/en-us/nuget/consume-packages/Central-Package-Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Ical.Net" Version="4.3.1" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.5" />
+  </ItemGroup>
+</Project>
