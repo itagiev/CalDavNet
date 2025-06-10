@@ -5,6 +5,8 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="DotNetEnv" Version="3.1.1" />
+    <PackageVersion Include="HaemmerElectronics.SeppPenner.CalDAVNet" Version="1.0.3" />
     <PackageVersion Include="Ical.Net" Version="4.3.1" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.5" />
   </ItemGroup>

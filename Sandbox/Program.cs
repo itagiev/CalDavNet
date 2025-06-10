@@ -1,22 +1,24 @@
-using System.Text;
+using CalDavNet;
 
 using Microsoft.Extensions.DependencyInjection;
-
-using CalDavNet;
-using Ical.Net;
-using System.Xml;
-using System.Xml.Linq;
 
 namespace Sandbox;
 
 class Program
 {
+    static string Username = null!;
+    static string Password = null!;
+
     static async Task Main(string[] args)
     {
-        var email = "i.tagiev@adamcode.ru";
-        var token = GetAuthToken();
+        DotNetEnv.Env.Load();
+
+        Username = Environment.GetEnvironmentVariable("YANDEX_USERNAME")!;
+        Password = Environment.GetEnvironmentVariable("YANDEX_PASSWORD")!;
+
         var services = new ServiceCollection();
-        services.AddYandexCal(options =>
+
+        services.AddCalDavClient(options =>
         {
             options.BaseAddress = new Uri("https://caldav.yandex.ru");
         });
@@ -24,17 +26,82 @@ class Program
         var provider = services.BuildServiceProvider();
 
         using var scope = provider.CreateScope();
-        var client = scope.ServiceProvider.GetRequiredService<CalDavClient>();
+        var calDavClient = scope.ServiceProvider.GetRequiredService<CalDavClient>();
+        var client = new Client(calDavClient, Username, Password);
 
-
-        var report = await client.ReportAsync(token, email);
+        await Process(client);
     }
 
-    static string GetAuthToken()
+    static async Task Process(Client client)
     {
-        string username = "i.tagiev@adamcode.ru";
-        string password = "kzjrzvxckbmettkj";
-        string token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
-        return token;
+        var upn = await client.GetPrincipalNameAsync();
+
+        ArgumentNullException.ThrowIfNull(upn);
+
+        Console.WriteLine(upn);
+        var principal = await client.GetPrincipalAsync(upn);
+
+        ArgumentNullException.ThrowIfNull(principal);
+        ArgumentNullException.ThrowIfNull(principal.CalendarHomeSet);
+
+        Console.WriteLine(principal.CalendarHomeSet);
+
+        var calendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
+            [], [XNames.ResourceType, XNames.DisplayName, XNames.GetCTag, XNames.SyncToken]);
+
+        ArgumentNullException.ThrowIfNull(calendars);
+
+        foreach (var calendar in calendars)
+        {
+            Console.WriteLine("========================");
+            Console.WriteLine(calendar.Uri);
+            Console.WriteLine(calendar.DisplayName);
+            Console.WriteLine(calendar.CTag);
+            Console.WriteLine(calendar.SyncToken);
+            Console.WriteLine("========================");
+
+            var fullCalendar = await client.GetCalendarByUriAsync(calendar.Uri,
+                [XNames.AllProp], []);
+        }
     }
+
+    //static async Task TestCalendarsAsync(Client client)
+    //{
+    //    var calendars = await client.GetCalendarsAsync((CancellationToken)default, XNames.ResourceType, XNames.DisplayName,
+    //        XNames.GetCTag, XNames.SupportedCalendarComponentSet, XNames.GetLastModified);
+
+    //    foreach (var calendar in calendars ?? [])
+    //    {
+    //        Console.WriteLine($"{calendar.DisplayName} {calendar.Uri}");
+    //    }
+    //}
+
+    //static async Task TestCalendarAsync(Client client)
+    //{
+    //    var body = Helpers.BuildPropfindBody(XNames.CalendarData);
+
+    //    var token = GetAuthToken();
+
+    //    var response = await client.GetCalendarAsync(token, @"/calendars/i.tagiev%40adamcode.ru/events-27560559/", body);
+
+    //    var entry = response.Entries.FirstOrDefault();
+
+    //    Console.WriteLine(entry!.Properties[XNames.CalendarData].Value);
+    //}
+
+    //static async Task AllCalendarsTestAsync(Client client)
+    //{
+    //    var calendars = await client.GetCalendarsAsync((CancellationToken)default, XNames.ResourceType, XNames.DisplayName,
+    //        XNames.GetCTag, XNames.SupportedCalendarComponentSet, XNames.GetLastModified);
+
+    //    foreach (var calendar in calendars ?? [])
+    //    {
+    //        Console.WriteLine("====================================================");
+    //        Console.WriteLine($"{calendar.DisplayName ?? "[NO_DISPLAY_NAME]"} {calendar.Uri}");
+
+    //        var c = await client.GetCalendarByUriAsync(calendar.Uri, Helpers.BuildAllPropPropfindBody());
+
+    //        Console.WriteLine("====================================================");
+    //    }
+    //}
 }

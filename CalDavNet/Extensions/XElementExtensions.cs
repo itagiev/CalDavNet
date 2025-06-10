@@ -1,16 +1,28 @@
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace CalDavNet.Extensions;
+namespace CalDavNet;
 
 public static class XElementExtensions
 {
-    public static XElement? LocalNameElement(this XElement element, string localName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
-    {
-        return element.Elements().FirstOrDefault(x => x.Name.LocalName.Equals(localName, comparison));
-    }
+    private static readonly Regex StatusCodeRegex = new Regex(@"\b(\d{3})\b", RegexOptions.Compiled);
 
-    public static IEnumerable<XElement> LocalNameElements(this XElement element, string localName, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+    public static int GetStatusCode(this XElement element)
     {
-        return element.Elements().Where(x => x.Name.ToString().Equals(localName, comparison));
+        string? status = element.Element(XName.Get(Constants.Dav.Status, Constants.Dav.Namespace))?.Value;
+
+        if (string.IsNullOrEmpty(status))
+        {
+            return -1;
+        }
+
+        Match match = StatusCodeRegex.Match(status);
+
+        if (match.Success && int.TryParse(match.Value, out var code))
+        {
+            return code;
+        }
+
+        return -1;
     }
 }

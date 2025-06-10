@@ -1,10 +1,12 @@
+using System.Net.Http.Headers;
+
 using CalDavNet;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static CalDavBuilder AddYandexCal(this IServiceCollection services)
+    public static CalDavBuilder AddCalDavClient(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
@@ -21,8 +23,16 @@ public static class DependencyInjection
         services.AddHttpClient(nameof(CalDavClient),
             options =>
             {
+                ArgumentNullException.ThrowIfNull(builder.BaseAddress);
                 options.BaseAddress = builder.BaseAddress;
-                options.DefaultRequestHeaders.Add("Depth", "1");
+
+                if (!string.IsNullOrEmpty(builder.Depth))
+                    options.DefaultRequestHeaders.Add("Depth", builder.Depth);
+
+                if (!string.IsNullOrEmpty(builder.Prefer))
+                    options.DefaultRequestHeaders.Add("Prefer", builder.Prefer);
+
+                options.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             });
 
         services.AddSingleton<CalDavClient>();
@@ -30,11 +40,11 @@ public static class DependencyInjection
         return builder;
     }
 
-    public static CalDavBuilder AddYandexCal(this IServiceCollection services, Action<CalDavBuilder> configure)
+    public static CalDavBuilder AddCalDavClient(this IServiceCollection services, Action<CalDavBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(configure);
 
-        var builder = services.AddYandexCal();
+        var builder = services.AddCalDavClient();
 
         configure(builder);
 
