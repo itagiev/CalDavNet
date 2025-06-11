@@ -43,9 +43,13 @@ public static class Constants
     public static class Cal
     {
         public const string Namespace = "urn:ietf:params:xml:ns:caldav";
-        public const string Prefix = "cal";
+        public const string Prefix = "c";
 
         public const string Calendar = "calendar";
+        public const string CalendarQuery = "calendar-query";
+        public const string Filter = "filter";
+        public const string Comp = "comp";
+        public const string CompFilter = "comp-filter";
         public const string CalendarHomeSet = "calendar-home-set";
         public const string CalendarData = "calendar-data";
         public const string CalendarDescription = "calendar-description";
@@ -127,6 +131,14 @@ public static class XNames
     #region Cal
 
     public static XName Calendar => XName.Get(Constants.Cal.Calendar, Constants.Cal.Namespace);
+
+    public static XName CalendarQuery => XName.Get(Constants.Cal.CalendarQuery, Constants.Cal.Namespace);
+
+    public static XName Filter => XName.Get(Constants.Cal.Filter, Constants.Cal.Namespace);
+
+    public static XName Comp => XName.Get(Constants.Cal.Comp, Constants.Cal.Namespace);
+
+    public static XName CompFilter => XName.Get(Constants.Cal.CompFilter, Constants.Cal.Namespace);
 
     public static XName CalendarHomeSet => XName.Get(Constants.Cal.CalendarHomeSet, Constants.Cal.Namespace);
 

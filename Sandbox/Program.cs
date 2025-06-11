@@ -47,21 +47,38 @@ class Program
         Console.WriteLine(principal.CalendarHomeSet);
 
         var calendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
-            [], [XNames.ResourceType, XNames.DisplayName, XNames.GetCTag, XNames.SyncToken]);
+            [], [XNames.ResourceType, XNames.GetCTag, XNames.SyncToken]);
 
         ArgumentNullException.ThrowIfNull(calendars);
 
         foreach (var calendar in calendars)
         {
-            Console.WriteLine("========================");
+            Console.WriteLine("==============================");
             Console.WriteLine(calendar.Uri);
-            Console.WriteLine(calendar.DisplayName);
             Console.WriteLine(calendar.CTag);
             Console.WriteLine(calendar.SyncToken);
-            Console.WriteLine("========================");
+            Console.WriteLine("==============================");
+        }
 
-            var fullCalendar = await client.GetCalendarByUriAsync(calendar.Uri,
-                [XNames.AllProp], []);
+        ArgumentNullException.ThrowIfNull(calendars.FirstOrDefault());
+
+        var defaultCalendar = await client.GetCalendarByUriAsync(calendars.FirstOrDefault()!.Uri, [XNames.AllProp], []);
+
+        ArgumentNullException.ThrowIfNull(defaultCalendar);
+
+        Console.WriteLine(defaultCalendar.DisplayName);
+        Console.WriteLine();
+
+        var events = await client.GetEventsAsync(defaultCalendar.Uri);
+
+        ArgumentNullException.ThrowIfNull(events);
+
+        foreach (var @event in events)
+        {
+            Console.WriteLine("==============================");
+            Console.WriteLine(@event.Uri);
+            Console.WriteLine(@event.ETag);
+            Console.WriteLine("==============================");
         }
     }
 

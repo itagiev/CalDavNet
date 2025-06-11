@@ -4,8 +4,8 @@ namespace CalDavNet;
 
 public class CalDavClient
 {
-    public static readonly HttpMethod Report = new HttpMethod("REPORT");
     public static readonly HttpMethod Propfind = new HttpMethod("PROPFIND");
+    public static readonly HttpMethod Report = new HttpMethod("REPORT");
 
     private readonly IHttpClientFactory _clientFactory;
 
@@ -21,6 +21,13 @@ public class CalDavClient
         return request;
     }
 
+    public HttpRequestMessage BuildReportRequestMessage(string uri, XDocument body)
+    {
+        var request = new HttpRequestMessage(Report, uri);
+        request.Content = body.ToStringContent();
+        return request;
+    }
+
     public async Task<MultistatusResponse> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
         var httpClient = _clientFactory.CreateClient(nameof(CalDavClient));
@@ -28,37 +35,6 @@ public class CalDavClient
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         return new MultistatusResponse((int)response.StatusCode, content);
     }
-
-    //public async Task<MultistatusResponse> GetCalendarAsync(
-    //    string token,
-    //    string calendarHref,
-    //    XDocument body,
-    //    CancellationToken cancellationToken = default)
-    //{
-    //    var httpClient = CreateClient(token);
-
-    //    var request = new HttpRequestMessage(Propfind, calendarHref);
-    //    request.Content = body.ToStringContent();
-
-    //    request.Headers.Add("Depth", "0");
-
-    //    var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-    //    var content = await response.Content.ReadAsStringAsync(cancellationToken);
-    //    Console.WriteLine(content);
-    //    return new MultistatusResponse((int)response.StatusCode, content);
-    //}
-
-    //public async Task<MultistatusResponse> ReportAsync(string token, string principal, CancellationToken cancellationToken = default)
-    //{
-    //    var httpClient = CreateClient(token);
-
-    //    var request = new HttpRequestMessage(Report, $"calendars/{principal}/events-default");
-    //    request.Content = new StringContent(BuildRequestTemplate(), Encoding.UTF8, XmlMediaType);
-
-    //    var response = await httpClient.SendAsync(request, cancellationToken);
-    //    var content = await response.Content.ReadAsStringAsync(cancellationToken);
-    //    return new MultistatusResponse((int)response.StatusCode, content);
-    //}
 
     //private string BuildRequestTemplate()
     //{
@@ -73,20 +49,20 @@ public class CalDavClient
     //        <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
     //          <D:prop>
     //            <D:getetag/>
-    //              <C:calendar-data>
+    //            <C:calendar-data>
     //              <C:comp name="VCALENDAR">
-    //              <C:prop name="VERSION"/>
+    //                <C:prop name="VERSION"/>
     //                <C:comp name="VEVENT">
-    //                <C:prop name="SUMMARY"/>
-    //                <C:prop name="UID"/>
-    //                <C:prop name="DTSTART"/>
-    //                <C:prop name="DTEND"/>
-    //                <C:prop name="DURATION"/>
-    //                <C:prop name="RRULE"/>
-    //                <C:prop name="RDATE"/>
-    //                <C:prop name="EXRULE"/>
-    //                <C:prop name="EXDATE"/>
-    //                <C:prop name="RECURRENCE-ID"/>
+    //                 <C:prop name="SUMMARY"/>
+    //                 <C:prop name="UID"/>
+    //                 <C:prop name="DTSTART"/>
+    //                 <C:prop name="DTEND"/>
+    //                 <C:prop name="DURATION"/>
+    //                 <C:prop name="RRULE"/>
+    //                 <C:prop name="RDATE"/>
+    //                 <C:prop name="EXRULE"/>
+    //                 <C:prop name="EXDATE"/>
+    //                 <C:prop name="RECURRENCE-ID"/>
     //              </C:comp>
     //              <C:comp name="VTIMEZONE"/>
     //              </C:comp>

@@ -33,8 +33,10 @@ public static class DependencyInjection
                     options.DefaultRequestHeaders.Add("Prefer", builder.Prefer);
 
                 options.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            });
+            })
+            .AddHttpMessageHandler<LoggingHandler>();
 
+        services.AddSingleton<LoggingHandler>();
         services.AddSingleton<CalDavClient>();
 
         return builder;

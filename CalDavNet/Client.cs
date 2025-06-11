@@ -19,19 +19,19 @@ public class Client
         var body = Helpers.BuildCurrentUserPrincipalPropfindBody();
 
         var request = _caldav.BuildPropfindRequestMessage("", body)
-            .WithDepth(1)
+            .WithDepth(0)
             .WithBasicAuthorization(_token);
 
         var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (!(response.IsSuccess
+        if (response.IsSuccess
             && response.Entries.FirstOrDefault() is MultistatusEntry entry
-            && entry.Properties.TryGetValue(XNames.CurrentUserPrincipal, out var element)))
+            && entry.Properties.TryGetValue(XNames.CurrentUserPrincipal, out var element))
         {
-            return null;
+            return element.Value;
         }
 
-        return element.Value;
+        return null;
     }
 
     public async Task<Principal?> GetPrincipalAsync(string upn, CancellationToken cancellationToken = default)
@@ -44,10 +44,10 @@ public class Client
 
         var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (!(response.IsSuccess && response.Entries.FirstOrDefault() is MultistatusEntry entry))
-            return null;
+        if (response.IsSuccess && response.Entries.FirstOrDefault() is MultistatusEntry entry)
+            return new Principal(entry);
 
-        return new Principal(entry);
+        return null;
     }
 
     public async Task<List<Calendar>?> GetCalendarsAsync(
@@ -85,6 +85,7 @@ public class Client
     {
         var body = Helpers.BuildPropfindBody(propfinds, props);
         var request = _caldav.BuildPropfindRequestMessage(uri, body)
+            .WithDepth(0)
             .WithBasicAuthorization(_token);
 
         var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -98,5 +99,29 @@ public class Client
         }
 
         return null;
+    }
+
+    public async Task<List<Event>?> GetEventsAsync(string uri,
+        CancellationToken cancellationToken = default)
+    {
+        var body = Helpers.BuildReportBody();
+        var request = _caldav.BuildReportRequestMessage(uri, body)
+            .WithBasicAuthorization(_token);
+
+        var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+        if (!response.IsSuccess)
+        {
+            return null;
+        }
+
+        List<Event> events = [];
+
+        foreach (var entry in response.Entries)
+        {
+            events.Add(new Event(entry));
+        }
+
+        return events;
     }
 }
