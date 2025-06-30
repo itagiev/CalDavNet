@@ -2,10 +2,8 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public class Principal
+public class Principal : IEntity
 {
-    private readonly IReadOnlyDictionary<XName, XElement> _properties;
-
     private string? _calendarHomeSet;
 
     public string Uri { get; } = null!;
@@ -14,9 +12,9 @@ public class Principal
     {
         get
         {
-            if (_calendarHomeSet is null && _properties.ContainsKey(XNames.CalendarHomeSet))
+            if (_calendarHomeSet is null && Properties.TryGetValue(XNames.CalendarHomeSet, out var element))
             {
-                _calendarHomeSet = _properties[XNames.CalendarHomeSet].Value;
+                _calendarHomeSet = element.Value;
             }
 
             return _calendarHomeSet;
@@ -26,6 +24,8 @@ public class Principal
     public Principal(MultistatusEntry entry)
     {
         Uri = entry.Uri;
-        _properties = entry.Properties;
+        Properties = entry.Properties;
     }
+
+    public IReadOnlyDictionary<XName, XElement> Properties { get; }
 }

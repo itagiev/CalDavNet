@@ -2,10 +2,8 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public class Calendar
+public class Calendar : IEntity
 {
-    private readonly IReadOnlyDictionary<XName, XElement> _properties;
-
     private string? _displayName;
     private string? _ctag;
     private string? _syncToken;
@@ -16,9 +14,9 @@ public class Calendar
     {
         get
         {
-            if (_displayName is null && _properties.ContainsKey(XNames.DisplayName))
+            if (_displayName is null && Properties.TryGetValue(XNames.DisplayName, out var element))
             {
-                _displayName = _properties[XNames.DisplayName].Value;
+                _displayName = element.Value;
             }
 
             return _displayName;
@@ -29,9 +27,9 @@ public class Calendar
     {
         get
         {
-            if (_ctag is null && _properties.ContainsKey(XNames.GetCTag))
+            if (_ctag is null && Properties.TryGetValue(XNames.GetCTag, out var element))
             {
-                _ctag = _properties[XNames.GetCTag].Value;
+                _ctag = element.Value;
             }
 
             return _ctag;
@@ -42,9 +40,9 @@ public class Calendar
     {
         get
         {
-            if (_syncToken is null && _properties.ContainsKey(XNames.SyncToken))
+            if (_syncToken is null && Properties.TryGetValue(XNames.SyncToken, out var element))
             {
-                _syncToken = _properties[XNames.SyncToken].Value;
+                _syncToken = element.Value;
             }
 
             return _syncToken;
@@ -54,6 +52,8 @@ public class Calendar
     public Calendar(MultistatusEntry entry)
     {
         Uri = entry.Uri;
-        _properties = entry.Properties;
+        Properties = entry.Properties;
     }
+
+    public IReadOnlyDictionary<XName, XElement> Properties { get; }
 }

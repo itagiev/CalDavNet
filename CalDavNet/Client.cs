@@ -16,7 +16,7 @@ public class Client
 
     public async Task<string?> GetPrincipalNameAsync(CancellationToken cancellationToken = default)
     {
-        var body = Helpers.BuildCurrentUserPrincipalPropfindBody();
+        var body = BodyBuilder.BuildCurrentUserPrincipalPropfindBody();
 
         var request = _caldav.BuildPropfindRequestMessage("", body)
             .WithDepth(0)
@@ -36,7 +36,7 @@ public class Client
 
     public async Task<Principal?> GetPrincipalAsync(string upn, CancellationToken cancellationToken = default)
     {
-        var body = Helpers.BuildAllPropPropfindBody();
+        var body = BodyBuilder.BuildAllPropPropfindBody();
 
         var request = _caldav.BuildPropfindRequestMessage(upn, body)
             .WithDepth(0)
@@ -52,11 +52,9 @@ public class Client
 
     public async Task<List<Calendar>?> GetCalendarsAsync(
         string calendarHomeSet,
-        IReadOnlyCollection<XName> propfinds,
-        IReadOnlyCollection<XName> props,
+        XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var body = Helpers.BuildPropfindBody(propfinds, props);
         var request = _caldav.BuildPropfindRequestMessage(calendarHomeSet, body)
             .WithBasicAuthorization(_token);
 
@@ -79,11 +77,9 @@ public class Client
     }
 
     public async Task<Calendar?> GetCalendarByUriAsync(string uri,
-        IReadOnlyCollection<XName> propfinds,
-        IReadOnlyCollection<XName> props,
+        XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var body = Helpers.BuildPropfindBody(propfinds, props);
         var request = _caldav.BuildPropfindRequestMessage(uri, body)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
@@ -102,9 +98,9 @@ public class Client
     }
 
     public async Task<List<Event>?> GetEventsAsync(string uri,
+        XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var body = Helpers.BuildReportBody();
         var request = _caldav.BuildReportRequestMessage(uri, body)
             .WithBasicAuthorization(_token);
 
@@ -124,4 +120,14 @@ public class Client
 
         return events;
     }
+
+    //public async Task<Event?> GetEventByUriAsync(string uri,
+    //    XDocument body,
+    //    CancellationToken cancellationToken = default)
+    //{
+    //    var request = _caldav.BuildReportRequestMessage(uri, body)
+    //        .WithBasicAuthorization(_token);
+
+
+    //}
 }

@@ -11,25 +11,37 @@ class Program
 
     static async Task Main(string[] args)
     {
-        DotNetEnv.Env.Load();
+        //DotNetEnv.Env.Load();
 
-        Username = Environment.GetEnvironmentVariable("YANDEX_USERNAME")!;
-        Password = Environment.GetEnvironmentVariable("YANDEX_PASSWORD")!;
+        //Username = Environment.GetEnvironmentVariable("YANDEX_USERNAME")!;
+        //Password = Environment.GetEnvironmentVariable("YANDEX_PASSWORD")!;
 
-        var services = new ServiceCollection();
+        //var services = new ServiceCollection();
 
-        services.AddCalDavClient(options =>
-        {
-            options.BaseAddress = new Uri("https://caldav.yandex.ru");
-        });
+        //services.AddCalDavClient(options =>
+        //{
+        //    options.BaseAddress = new Uri("https://caldav.yandex.ru");
+        //});
 
-        var provider = services.BuildServiceProvider();
+        //var provider = services.BuildServiceProvider();
 
-        using var scope = provider.CreateScope();
-        var calDavClient = scope.ServiceProvider.GetRequiredService<CalDavClient>();
-        var client = new Client(calDavClient, Username, Password);
+        //using var scope = provider.CreateScope();
+        //var calDavClient = scope.ServiceProvider.GetRequiredService<CalDavClient>();
+        //var client = new Client(calDavClient, Username, Password);
 
-        await Process(client);
+        //await Process(client);
+
+        #region Filter Test
+
+        FilterBuilder filterBuilder = new FilterBuilder();
+
+        filterBuilder.AddCompFilter(Constants.CompFilter.VEVENT)
+            .AddTimeRange(DateTime.UtcNow, DateTime.UtcNow.AddMonths(1))
+            .AddTextMatch(Constants.PropFilter.SUMMARY, "Meeting", true, "i;unicode-casemap");
+
+        Console.WriteLine(filterBuilder.ToXElement.ToString());
+
+        #endregion
     }
 
     static async Task Process(Client client)
@@ -38,47 +50,47 @@ class Program
 
         ArgumentNullException.ThrowIfNull(upn);
 
-        Console.WriteLine(upn);
+        Console.WriteLine("User principal name: " + upn);
         var principal = await client.GetPrincipalAsync(upn);
 
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(principal.CalendarHomeSet);
 
-        Console.WriteLine(principal.CalendarHomeSet);
+        Console.WriteLine("\nCalendar home set: " + principal.CalendarHomeSet);
 
         var calendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
-            [], [XNames.ResourceType, XNames.GetCTag, XNames.SyncToken]);
+            BodyBuilder.BuildPropfindBody([], [XNames.ResourceType, XNames.GetCTag, XNames.SyncToken]));
 
         ArgumentNullException.ThrowIfNull(calendars);
+        
+        Console.WriteLine("\nCalendars list:");
 
         foreach (var calendar in calendars)
         {
-            Console.WriteLine("==============================");
+            Console.WriteLine();
             Console.WriteLine(calendar.Uri);
-            Console.WriteLine(calendar.CTag);
-            Console.WriteLine(calendar.SyncToken);
-            Console.WriteLine("==============================");
         }
 
         ArgumentNullException.ThrowIfNull(calendars.FirstOrDefault());
 
-        var defaultCalendar = await client.GetCalendarByUriAsync(calendars.FirstOrDefault()!.Uri, [XNames.AllProp], []);
+        var defaultCalendar = await client.GetCalendarByUriAsync(calendars.FirstOrDefault()!.Uri,
+            BodyBuilder.BuildPropfindBody([XNames.AllProp], []));
 
         ArgumentNullException.ThrowIfNull(defaultCalendar);
 
-        Console.WriteLine(defaultCalendar.DisplayName);
-        Console.WriteLine();
+        Console.WriteLine("\nEstimated default calendar: " + defaultCalendar.DisplayName);
 
-        var events = await client.GetEventsAsync(defaultCalendar.Uri);
+        var events = await client.GetEventsAsync(defaultCalendar.Uri,
+            BodyBuilder.BuildReportBody(DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddMonths(1)));
 
         ArgumentNullException.ThrowIfNull(events);
 
+        Console.WriteLine("\nEvents list: ");
+
         foreach (var @event in events)
         {
-            Console.WriteLine("==============================");
+            Console.WriteLine();
             Console.WriteLine(@event.Uri);
-            Console.WriteLine(@event.ETag);
-            Console.WriteLine("==============================");
         }
     }
 

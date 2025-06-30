@@ -50,6 +50,9 @@ public static class Constants
         public const string Filter = "filter";
         public const string Comp = "comp";
         public const string CompFilter = "comp-filter";
+        public const string PropFilter = "prop-filter";
+        public const string TimeRange = "time-range";
+        public const string TextMatch = "text-match";
         public const string CalendarHomeSet = "calendar-home-set";
         public const string CalendarData = "calendar-data";
         public const string CalendarDescription = "calendar-description";
@@ -71,6 +74,54 @@ public static class Constants
         public const string CalendarColor = "calendar-color";
         public const string CalendarOrder = "calendar-order";
         public const string CalendarEnabled = "calendar-enabled";
+    }
+
+    public static class CompFilter
+    {
+        /// <summary>
+        /// Календарь.
+        /// </summary>
+        public const string VCALENDAR = "VCALENDAR";
+        /// <summary>
+        /// Событие.
+        /// </summary>
+        public const string VEVENT = "VEVENT";
+        /// <summary>
+        /// Задача.
+        /// </summary>
+        public const string VTODO = "VTODO";
+        /// <summary>
+        /// Заметка.
+        /// </summary>
+        public const string VJOURNAL = "VJOURNAL";
+        /// <summary>
+        /// Доступность.
+        /// </summary>
+        public const string VFREEBUSY = "VFREEBUSY";
+        /// <summary>
+        /// Напоминание.
+        /// </summary>
+        public const string VALARM = "VALARM";
+    }
+
+    public static class PropFilter
+    {
+        /// <summary>
+        /// Заголовок.
+        /// </summary>
+        public const string SUMMARY = "SUMMARY";
+        /// <summary>
+        /// Место.
+        /// </summary>
+        public const string LOCATION = "LOCATION";
+        /// <summary>
+        /// Описание.
+        /// </summary>
+        public const string DESCRIPTION = "DESCRIPTION";
+        /// <summary>
+        /// Уникальный идентификатор.
+        /// </summary>
+        public const string UID = "UID";
     }
 }
 
@@ -139,6 +190,12 @@ public static class XNames
     public static XName Comp => XName.Get(Constants.Cal.Comp, Constants.Cal.Namespace);
 
     public static XName CompFilter => XName.Get(Constants.Cal.CompFilter, Constants.Cal.Namespace);
+
+    public static XName PropFilter => XName.Get(Constants.Cal.PropFilter, Constants.Cal.Namespace);
+
+    public static XName TimeRange => XName.Get(Constants.Cal.TimeRange, Constants.Cal.Namespace);
+
+    public static XName TextMatch => XName.Get(Constants.Cal.TextMatch, Constants.Cal.Namespace);
 
     public static XName CalendarHomeSet => XName.Get(Constants.Cal.CalendarHomeSet, Constants.Cal.Namespace);
 
