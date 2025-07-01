@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public class Event : IEntity
+public class VEvent : IEntity
 {
     private string? _etag;
 
@@ -36,7 +36,7 @@ public class Event : IEntity
         }
     }
 
-    public Event(MultistatusEntry entry)
+    public VEvent(MultistatusEntry entry)
     {
         Uri = entry.Uri;
         Properties = entry.Properties;

@@ -19,13 +19,6 @@ public class FilterBuilder
         _vcalendar.Add(compFilter);
         return this;
     }
-
-    public CompFilterBuilder AddCompFilter(string compName)
-    {
-        var compFilterBuilder = new CompFilterBuilder(compName);
-        _vcalendar.Add(compFilterBuilder.ToXElement);
-        return compFilterBuilder;
-    }
 }
 
 public class CompFilterBuilder
@@ -51,12 +44,15 @@ public class CompFilterBuilder
     }
 
     /// <summary>
-    /// 
+    /// Adds a text-match condition to a property filter within a calendar component filter.
+    /// This is used to match text content of a specific property (e.g., SUMMARY, DESCRIPTION).
     /// </summary>
-    /// <param name="propName"></param>
-    /// <param name="value"></param>
-    /// <param name="negate"></param>
-    /// <param name="collation"></param>
+    /// <param name="propName">The name of the property to filter on (e.g., <c>SUMMARY</c>).</param>
+    /// <param name="value">The text value to match within the property.</param>
+    /// <param name="negate">Whether the match should be negated (i.e., select entries that do <b>not</b> match).</param>
+    /// <param name="collation">
+    /// The collation to use for comparison (e.g., <c>i;unicode-casemap</c>). Optional; if null, the server default is used.
+    /// </param>
     /// <returns></returns>
     public CompFilterBuilder AddTextMatch(string propName, string value,
         bool negate = false, string? collation = null)

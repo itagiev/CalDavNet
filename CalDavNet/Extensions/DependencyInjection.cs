@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static CalDavBuilder AddCalDavClient(this IServiceCollection services)
+    public static CalDavBuilder AddCalDav(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
@@ -42,11 +42,11 @@ public static class DependencyInjection
         return builder;
     }
 
-    public static CalDavBuilder AddCalDavClient(this IServiceCollection services, Action<CalDavBuilder> configure)
+    public static CalDavBuilder AddCalDav(this IServiceCollection services, Action<CalDavBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(configure);
 
-        var builder = services.AddCalDavClient();
+        var builder = services.AddCalDav();
 
         configure(builder);
 

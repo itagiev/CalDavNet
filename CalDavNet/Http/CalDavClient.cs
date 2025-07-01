@@ -4,8 +4,8 @@ namespace CalDavNet;
 
 public class CalDavClient
 {
-    public static readonly HttpMethod Propfind = new HttpMethod("PROPFIND");
-    public static readonly HttpMethod Report = new HttpMethod("REPORT");
+    private static readonly HttpMethod Propfind = new HttpMethod("PROPFIND");
+    private static readonly HttpMethod Report = new HttpMethod("REPORT");
 
     private readonly IHttpClientFactory _clientFactory;
 
@@ -13,6 +13,8 @@ public class CalDavClient
     {
         _clientFactory = clientFactory;
     }
+
+    public HttpClient HttpClient => _clientFactory.CreateClient(nameof(CalDavClient));
 
     public HttpRequestMessage BuildPropfindRequestMessage(string uri, XDocument body)
     {

@@ -47,6 +47,7 @@ public static class Constants
 
         public const string Calendar = "calendar";
         public const string CalendarQuery = "calendar-query";
+        public const string CalendarMultiget = "calendar-multiget";
         public const string Filter = "filter";
         public const string Comp = "comp";
         public const string CompFilter = "comp-filter";
@@ -184,6 +185,8 @@ public static class XNames
     public static XName Calendar => XName.Get(Constants.Cal.Calendar, Constants.Cal.Namespace);
 
     public static XName CalendarQuery => XName.Get(Constants.Cal.CalendarQuery, Constants.Cal.Namespace);
+
+    public static XName CalendarMultiget => XName.Get(Constants.Cal.CalendarMultiget, Constants.Cal.Namespace);
 
     public static XName Filter => XName.Get(Constants.Cal.Filter, Constants.Cal.Namespace);
 

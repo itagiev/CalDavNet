@@ -1,7 +1,5 @@
 using System.Xml.Linq;
 
-using static CalDavNet.Constants;
-
 namespace CalDavNet;
 
 public static class BodyBuilder
@@ -65,7 +63,7 @@ public static class BodyBuilder
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), propfind);
     }
 
-    public static XDocument BuildReportBody(DateTime from, DateTime to)
+    public static XDocument BuildCalendarQueryBody(XElement filter)
     {
         var report = new XElement(XNames.CalendarQuery,
             new XAttribute(XNamespace.Xmlns + Constants.Dav.Prefix, Constants.Dav.Namespace),
@@ -75,20 +73,32 @@ public static class BodyBuilder
             new XElement(XNames.GetETag),
             new XElement(XNames.CalendarData));
 
-        var filter = new XElement(XNames.Filter);
-        var vcalendarFilter = new XElement(XNames.CompFilter, new XAttribute("name", Constants.CompFilter.VCALENDAR));
-        var veventFilter = new XElement(XNames.CompFilter, new XAttribute("name", CompFilter.VEVENT));
-        var timeRange = new XElement(XNames.TimeRange,
-            new XAttribute("start", from.ToString("yyyyMMdd'T'HHmmss'Z'")),
-            new XAttribute("end", to.ToString("yyyyMMdd'T'HHmmss'Z'")));
-
-        veventFilter.Add(timeRange);
-        vcalendarFilter.Add(veventFilter);
-        filter.Add(vcalendarFilter);
-
         report.Add(prop);
         report.Add(filter);
 
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), report);
+    }
+
+    public static XDocument BuildCalendarMultigetBody(params string[] uris)
+        => BuildCalendarMultigetBody(uris.AsEnumerable());
+
+    public static XDocument BuildCalendarMultigetBody(IEnumerable<string> uris)
+    {
+        var multiget = new XElement(XNames.CalendarMultiget,
+            new XAttribute(XNamespace.Xmlns + Constants.Dav.Prefix, Constants.Dav.Namespace),
+            new XAttribute(XNamespace.Xmlns + Constants.Cal.Prefix, Constants.Cal.Namespace));
+
+        var prop = new XElement(XNames.Prop,
+            new XElement(XNames.GetETag),
+            new XElement(XNames.CalendarData));
+
+        multiget.Add(prop);
+
+        foreach (var uri in uris)
+        {
+            multiget.Add(new XElement(XNames.Href, uri));
+        }
+
+        return new XDocument(new XDeclaration("1.0", "UTF-8", null), multiget);
     }
 }

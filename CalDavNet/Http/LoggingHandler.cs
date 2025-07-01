@@ -14,13 +14,13 @@ internal class LoggingHandler : DelegatingHandler
 
         HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
 
-        //Console.WriteLine("Response:");
-        //Console.WriteLine(response.ToString());
-        //if (response.Content != null)
-        //{
-        //    Console.WriteLine(await response.Content.ReadAsStringAsync());
-        //}
-        //Console.WriteLine();
+        Console.WriteLine("Response:");
+        Console.WriteLine(response.ToString());
+        if (response.Content != null)
+        {
+            Console.WriteLine(await response.Content.ReadAsStringAsync());
+        }
+        Console.WriteLine();
 
         return response;
     }

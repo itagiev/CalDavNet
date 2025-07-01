@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public class Calendar : IEntity
+public class VCalendar : IEntity
 {
     private string? _displayName;
     private string? _ctag;
@@ -49,7 +49,7 @@ public class Calendar : IEntity
         }
     }
 
-    public Calendar(MultistatusEntry entry)
+    public VCalendar(MultistatusEntry entry)
     {
         Uri = entry.Uri;
         Properties = entry.Properties;

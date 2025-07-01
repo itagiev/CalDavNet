@@ -5,12 +5,12 @@ namespace CalDavNet;
 
 public class Client
 {
-    private readonly CalDavClient _caldav;
+    private readonly CalDavClient _client;
     private readonly string _token;
 
     public Client(CalDavClient client, string username, string password)
     {
-        _caldav = client;
+        _client = client;
         _token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
     }
 
@@ -18,11 +18,11 @@ public class Client
     {
         var body = BodyBuilder.BuildCurrentUserPrincipalPropfindBody();
 
-        var request = _caldav.BuildPropfindRequestMessage("", body)
+        var request = _client.BuildPropfindRequestMessage("", body)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
-        var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (response.IsSuccess
             && response.Entries.FirstOrDefault() is MultistatusEntry entry
@@ -38,11 +38,11 @@ public class Client
     {
         var body = BodyBuilder.BuildAllPropPropfindBody();
 
-        var request = _caldav.BuildPropfindRequestMessage(upn, body)
+        var request = _client.BuildPropfindRequestMessage(upn, body)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
-        var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (response.IsSuccess && response.Entries.FirstOrDefault() is MultistatusEntry entry)
             return new Principal(entry);
@@ -50,84 +50,75 @@ public class Client
         return null;
     }
 
-    public async Task<List<Calendar>?> GetCalendarsAsync(
+    public async Task<List<VCalendar>?> GetCalendarsAsync(
         string calendarHomeSet,
         XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = _caldav.BuildPropfindRequestMessage(calendarHomeSet, body)
+        var request = _client.BuildPropfindRequestMessage(calendarHomeSet, body)
             .WithBasicAuthorization(_token);
 
-        var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccess) return null;
 
-        List<Calendar> calendars = [];
+        List<VCalendar> calendars = [];
 
         foreach (var entry in response.Entries)
         {
             // Only if entry has d:resource-type with d:calendar child
             if (entry.IsCalendar)
             {
-                calendars.Add(new Calendar(entry));
+                calendars.Add(new VCalendar(entry));
             }
         }
 
         return calendars;
     }
 
-    public async Task<Calendar?> GetCalendarByUriAsync(string uri,
+    public async Task<VCalendar?> GetCalendarByUriAsync(string uri,
         XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = _caldav.BuildPropfindRequestMessage(uri, body)
+        var request = _client.BuildPropfindRequestMessage(uri, body)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
-        var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         // Only if success, result not empty and has d:resource-type with d:calendar child
         if (response.IsSuccess &&
             response.Entries.FirstOrDefault() is MultistatusEntry entry &&
             entry.IsCalendar)
         {
-            return new Calendar(entry);
+            return new VCalendar(entry);
         }
 
         return null;
     }
 
-    public async Task<List<Event>?> GetEventsAsync(string uri,
+    public async Task<List<VEvent>?> GetEventsAsync(string uri,
         XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = _caldav.BuildReportRequestMessage(uri, body)
+        var request = _client.BuildReportRequestMessage(uri, body)
+            .WithDepth(0)
             .WithBasicAuthorization(_token);
 
-        var response = await _caldav.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccess)
         {
             return null;
         }
 
-        List<Event> events = [];
+        List<VEvent> events = [];
 
         foreach (var entry in response.Entries)
         {
-            events.Add(new Event(entry));
+            events.Add(new VEvent(entry));
         }
 
         return events;
     }
-
-    //public async Task<Event?> GetEventByUriAsync(string uri,
-    //    XDocument body,
-    //    CancellationToken cancellationToken = default)
-    //{
-    //    var request = _caldav.BuildReportRequestMessage(uri, body)
-    //        .WithBasicAuthorization(_token);
-
-
-    //}
 }

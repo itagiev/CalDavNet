@@ -1,5 +1,8 @@
 using CalDavNet;
 
+using Ical.Net;
+using Ical.Net.CalendarComponents;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Sandbox;
@@ -11,35 +14,35 @@ class Program
 
     static async Task Main(string[] args)
     {
-        //DotNetEnv.Env.Load();
+        DotNetEnv.Env.Load();
 
-        //Username = Environment.GetEnvironmentVariable("YANDEX_USERNAME")!;
-        //Password = Environment.GetEnvironmentVariable("YANDEX_PASSWORD")!;
+        Username = Environment.GetEnvironmentVariable("YANDEX_USERNAME")!;
+        Password = Environment.GetEnvironmentVariable("YANDEX_PASSWORD")!;
 
-        //var services = new ServiceCollection();
+        var services = new ServiceCollection();
 
-        //services.AddCalDavClient(options =>
-        //{
-        //    options.BaseAddress = new Uri("https://caldav.yandex.ru");
-        //});
+        services.AddCalDav(options =>
+        {
+            options.BaseAddress = new Uri("https://caldav.yandex.ru");
+        });
 
-        //var provider = services.BuildServiceProvider();
+        var provider = services.BuildServiceProvider();
 
-        //using var scope = provider.CreateScope();
-        //var calDavClient = scope.ServiceProvider.GetRequiredService<CalDavClient>();
-        //var client = new Client(calDavClient, Username, Password);
+        using var scope = provider.CreateScope();
+        var calDavClient = scope.ServiceProvider.GetRequiredService<CalDavClient>();
+        var client = new Client(calDavClient, Username, Password);
 
-        //await Process(client);
+        await Process(client);
 
         #region Filter Test
 
-        FilterBuilder filterBuilder = new FilterBuilder();
+        //FilterBuilder filterBuilder = new FilterBuilder();
 
-        filterBuilder.AddCompFilter(Constants.CompFilter.VEVENT)
-            .AddTimeRange(DateTime.UtcNow, DateTime.UtcNow.AddMonths(1))
-            .AddTextMatch(Constants.PropFilter.SUMMARY, "Meeting", true, "i;unicode-casemap");
+        //filterBuilder.AddCompFilter(Constants.CompFilter.VEVENT)
+        //    .AddTimeRange(DateTime.UtcNow, DateTime.UtcNow.AddMonths(1))
+        //    .AddTextMatch(Constants.PropFilter.SUMMARY, "Meeting", false, "i;unicode-casemap");
 
-        Console.WriteLine(filterBuilder.ToXElement.ToString());
+        //Console.WriteLine(filterBuilder.ToXElement.ToString());
 
         #endregion
     }
@@ -58,39 +61,68 @@ class Program
 
         Console.WriteLine("\nCalendar home set: " + principal.CalendarHomeSet);
 
-        var calendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
+        var vcalendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
             BodyBuilder.BuildPropfindBody([], [XNames.ResourceType, XNames.GetCTag, XNames.SyncToken]));
 
-        ArgumentNullException.ThrowIfNull(calendars);
+        ArgumentNullException.ThrowIfNull(vcalendars);
         
         Console.WriteLine("\nCalendars list:");
 
-        foreach (var calendar in calendars)
+        foreach (var vcal in vcalendars)
         {
-            Console.WriteLine();
-            Console.WriteLine(calendar.Uri);
+            Console.WriteLine(vcal.Uri);
         }
 
-        ArgumentNullException.ThrowIfNull(calendars.FirstOrDefault());
+        ArgumentNullException.ThrowIfNull(vcalendars.FirstOrDefault());
 
-        var defaultCalendar = await client.GetCalendarByUriAsync(calendars.FirstOrDefault()!.Uri,
+        var defaultVCalendar = await client.GetCalendarByUriAsync(vcalendars.FirstOrDefault()!.Uri,
             BodyBuilder.BuildPropfindBody([XNames.AllProp], []));
 
-        ArgumentNullException.ThrowIfNull(defaultCalendar);
+        ArgumentNullException.ThrowIfNull(defaultVCalendar);
 
-        Console.WriteLine("\nEstimated default calendar: " + defaultCalendar.DisplayName);
+        Console.WriteLine("\nEstimated default calendar: " + defaultVCalendar.DisplayName);
 
-        var events = await client.GetEventsAsync(defaultCalendar.Uri,
-            BodyBuilder.BuildReportBody(DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddMonths(1)));
+        var filter = new FilterBuilder()
+            .AddCompFilter(new CompFilterBuilder(Constants.CompFilter.VEVENT)
+                .AddTimeRange(DateTime.UtcNow, DateTime.UtcNow.AddMonths(1))
+                .ToXElement);
 
-        ArgumentNullException.ThrowIfNull(events);
+        var vevents = await client.GetEventsAsync(defaultVCalendar.Uri,
+            BodyBuilder.BuildCalendarQueryBody(filter.ToXElement));
 
-        Console.WriteLine("\nEvents list: ");
+        ArgumentNullException.ThrowIfNull(vevents);
 
-        foreach (var @event in events)
+        Console.WriteLine("\nEvents uri list: ");
+
+        foreach (var vevent in vevents)
         {
-            Console.WriteLine();
-            Console.WriteLine(@event.Uri);
+            Console.WriteLine(vevent.Uri);
+        }
+
+        var loadedVEvents = await client.GetEventsAsync(defaultVCalendar.Uri,
+            BodyBuilder.BuildCalendarMultigetBody(vevents.Select(x => x.Uri)));
+
+        ArgumentNullException.ThrowIfNull(loadedVEvents);
+
+        Console.WriteLine("\nLoaded events by uri: ");
+
+        Calendar? calendar = null;
+
+        foreach (var vevent in loadedVEvents)
+        {
+            if (calendar is null)
+            {
+                calendar = Calendar.Load(vevent.CalendarData);
+            }
+            else
+            {
+                calendar.MergeWith(Calendar.Load(vevent.CalendarData));
+            }
+        }
+
+        foreach (var e in calendar?.Events ?? Enumerable.Empty<CalendarEvent>())
+        {
+            Console.WriteLine($"Summary: {e.Summary}");
         }
     }
 
