@@ -23,7 +23,7 @@ public static class Constants
         public const string DisplayName = "displayname";
         public const string CreationDate = "creationdate";
         public const string GetLastModified = "getlastmodified";
-        public const string GetETag = "getetag";
+        public const string GetEtag = "getetag";
         public const string SyncToken = "sync-token";
         public const string AllProp = "allprop";
     }
@@ -33,7 +33,7 @@ public static class Constants
         public const string Namespace = "http://calendarserver.org/ns/";
         public const string Prefix = "cs";
 
-        public const string GetCTag = "getctag";
+        public const string GetCtag = "getctag";
         public const string SharedUrl = "shared-url";
         public const string ScheduleChanges = "schedule-changes";
         public const string DefaultAlarmVeventDate = "default-alarm-vevent-date";
@@ -158,7 +158,7 @@ public static class XNames
 
     public static XName GetLastModified => XName.Get(Constants.Dav.GetLastModified, Constants.Dav.Namespace);
 
-    public static XName GetETag => XName.Get(Constants.Dav.GetETag, Constants.Dav.Namespace);
+    public static XName GetEtag => XName.Get(Constants.Dav.GetEtag, Constants.Dav.Namespace);
 
     public static XName SyncToken => XName.Get(Constants.Dav.SyncToken, Constants.Dav.Namespace);
 
@@ -168,7 +168,7 @@ public static class XNames
 
     #region Server
 
-    public static XName GetCTag => XName.Get(Constants.Server.GetCTag, Constants.Server.Namespace);
+    public static XName GetCtag => XName.Get(Constants.Server.GetCtag, Constants.Server.Namespace);
 
     public static XName SharedUrl => XName.Get(Constants.Server.SharedUrl, Constants.Server.Namespace);
 

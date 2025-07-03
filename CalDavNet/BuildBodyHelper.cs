@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public static class BodyBuilder
+public static class BuildBodyHelper
 {
     public static XDocument BuildPropfindBody(IReadOnlyCollection<XName> props)
     {
@@ -15,7 +15,8 @@ public static class BodyBuilder
         if (props.Count > 0)
         {
             var prop = new XElement(XNames.Prop);
-            foreach (var name in props) prop.Add(new XElement(name));
+            foreach (var name in props)
+                prop.Add(new XElement(name));
             propfind.Add(prop);
         }
 
@@ -32,13 +33,15 @@ public static class BodyBuilder
 
         if (propfinds.Count > 0)
         {
-            foreach (var name in propfinds) propfind.Add(new XElement(name));
+            foreach (var name in propfinds)
+                propfind.Add(new XElement(name));
         }
 
         if (props.Count > 0)
         {
             var prop = new XElement(XNames.Prop);
-            foreach (var name in props) prop.Add(new XElement(name));
+            foreach (var name in props)
+                prop.Add(new XElement(name));
             propfind.Add(prop);
         }
 
@@ -65,18 +68,18 @@ public static class BodyBuilder
 
     public static XDocument BuildCalendarQueryBody(XElement filter)
     {
-        var report = new XElement(XNames.CalendarQuery,
+        var calendarQuery = new XElement(XNames.CalendarQuery,
             new XAttribute(XNamespace.Xmlns + Constants.Dav.Prefix, Constants.Dav.Namespace),
             new XAttribute(XNamespace.Xmlns + Constants.Cal.Prefix, Constants.Cal.Namespace));
 
         var prop = new XElement(XNames.Prop,
-            new XElement(XNames.GetETag),
+            new XElement(XNames.GetEtag),
             new XElement(XNames.CalendarData));
 
-        report.Add(prop);
-        report.Add(filter);
+        calendarQuery.Add(prop);
+        calendarQuery.Add(filter);
 
-        return new XDocument(new XDeclaration("1.0", "UTF-8", null), report);
+        return new XDocument(new XDeclaration("1.0", "UTF-8", null), calendarQuery);
     }
 
     public static XDocument BuildCalendarMultigetBody(params string[] uris)
@@ -89,15 +92,13 @@ public static class BodyBuilder
             new XAttribute(XNamespace.Xmlns + Constants.Cal.Prefix, Constants.Cal.Namespace));
 
         var prop = new XElement(XNames.Prop,
-            new XElement(XNames.GetETag),
+            new XElement(XNames.GetEtag),
             new XElement(XNames.CalendarData));
 
         multiget.Add(prop);
 
         foreach (var uri in uris)
-        {
             multiget.Add(new XElement(XNames.Href, uri));
-        }
 
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), multiget);
     }

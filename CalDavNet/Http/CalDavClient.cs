@@ -4,8 +4,8 @@ namespace CalDavNet;
 
 public class CalDavClient
 {
-    private static readonly HttpMethod Propfind = new HttpMethod("PROPFIND");
-    private static readonly HttpMethod Report = new HttpMethod("REPORT");
+    public static readonly HttpMethod Propfind = new HttpMethod("PROPFIND");
+    public static readonly HttpMethod Report = new HttpMethod("REPORT");
 
     private readonly IHttpClientFactory _clientFactory;
 
@@ -14,27 +14,25 @@ public class CalDavClient
         _clientFactory = clientFactory;
     }
 
-    public HttpClient HttpClient => _clientFactory.CreateClient(nameof(CalDavClient));
-
-    public HttpRequestMessage BuildPropfindRequestMessage(string uri, XDocument body)
-    {
-        var request = new HttpRequestMessage(Propfind, uri);
-        request.Content = body.ToStringContent();
-        return request;
-    }
-
-    public HttpRequestMessage BuildReportRequestMessage(string uri, XDocument body)
-    {
-        var request = new HttpRequestMessage(Report, uri);
-        request.Content = body.ToStringContent();
-        return request;
-    }
-
     public async Task<MultistatusResponse> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
         var httpClient = _clientFactory.CreateClient(nameof(CalDavClient));
         var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         return new MultistatusResponse((int)response.StatusCode, content);
+    }
+
+    public async Task<Response> PutAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        var httpClient = _clientFactory.CreateClient(nameof(CalDavClient));
+        var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        return new Response((int)response.StatusCode);
+    }
+
+    public async Task<Response> DeleteAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    {
+        var httpClient = _clientFactory.CreateClient(nameof(CalDavClient));
+        var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        return new Response((int)response.StatusCode);
     }
 }

@@ -15,4 +15,10 @@ public static class HttpRequestMessageExtensions
         request.Headers.Add("Depth", depth.ToString());
         return request;
     }
+
+    public static HttpRequestMessage WithETag(this HttpRequestMessage request, string etag)
+    {
+        request.Headers.Add("If-Match", $"\"{etag}\"");
+        return request;
+    }
 }

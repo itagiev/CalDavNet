@@ -1,7 +1,8 @@
 using CalDavNet;
 
-using Ical.Net;
 using Ical.Net.CalendarComponents;
+using Ical.Net.DataTypes;
+using Ical.Net.Serialization;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -62,7 +63,7 @@ class Program
         Console.WriteLine("\nCalendar home set: " + principal.CalendarHomeSet);
 
         var vcalendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
-            BodyBuilder.BuildPropfindBody([], [XNames.ResourceType, XNames.GetCTag, XNames.SyncToken]));
+            BuildBodyHelper.BuildPropfindBody([], [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken]));
 
         ArgumentNullException.ThrowIfNull(vcalendars);
         
@@ -76,7 +77,7 @@ class Program
         ArgumentNullException.ThrowIfNull(vcalendars.FirstOrDefault());
 
         var defaultVCalendar = await client.GetCalendarByUriAsync(vcalendars.FirstOrDefault()!.Uri,
-            BodyBuilder.BuildPropfindBody([XNames.AllProp], []));
+            BuildBodyHelper.BuildPropfindBody([XNames.AllProp], []));
 
         ArgumentNullException.ThrowIfNull(defaultVCalendar);
 
@@ -88,7 +89,7 @@ class Program
                 .ToXElement);
 
         var vevents = await client.GetEventsAsync(defaultVCalendar.Uri,
-            BodyBuilder.BuildCalendarQueryBody(filter.ToXElement));
+            BuildBodyHelper.BuildCalendarQueryBody(filter.ToXElement));
 
         ArgumentNullException.ThrowIfNull(vevents);
 
@@ -99,30 +100,64 @@ class Program
             Console.WriteLine(vevent.Uri);
         }
 
-        var loadedVEvents = await client.GetEventsAsync(defaultVCalendar.Uri,
-            BodyBuilder.BuildCalendarMultigetBody(vevents.Select(x => x.Uri)));
-
-        ArgumentNullException.ThrowIfNull(loadedVEvents);
-
-        Console.WriteLine("\nLoaded events by uri: ");
-
-        Calendar? calendar = null;
-
-        foreach (var vevent in loadedVEvents)
         {
-            if (calendar is null)
+            var loadedVEvents = await client.GetEventsAsync(defaultVCalendar.Uri,
+                BuildBodyHelper.BuildCalendarMultigetBody(vevents.Select(x => x.Uri)));
+
+            ArgumentNullException.ThrowIfNull(loadedVEvents);
+
+            Console.WriteLine("\nLoaded events by uri: ");
+            Ical.Net.Calendar? calendar = null;
+
+            foreach (var vevent in loadedVEvents)
             {
-                calendar = Calendar.Load(vevent.CalendarData);
+                if (calendar is null)
+                {
+                    calendar = Ical.Net.Calendar.Load(vevent.CalendarData);
+                }
+                else
+                {
+                    calendar.MergeWith(Ical.Net.Calendar.Load(vevent.CalendarData));
+                }
             }
-            else
+
+            foreach (var e in calendar?.Events ?? Enumerable.Empty<CalendarEvent>())
             {
-                calendar.MergeWith(Calendar.Load(vevent.CalendarData));
+                Console.WriteLine($"Summary: {e.Summary}");
             }
         }
 
-        foreach (var e in calendar?.Events ?? Enumerable.Empty<CalendarEvent>())
+        // Event creation
         {
-            Console.WriteLine($"Summary: {e.Summary}");
+            Console.WriteLine();
+
+            //var uid = Guid.NewGuid().ToString();
+            var uid = "145629b9-7238-4070-af93-32c275b9dd3d";
+
+            var date = new CalDateTime(DateTime.UtcNow.AddHours(12));
+            var @event = new CalendarEvent
+            {
+                // If Name property is used, it MUST be RFC 5545 compliant
+                Summary = "Spider-man", // Should always be present
+                Description = "Hobbit goes here", // optional
+                Start = date,
+                End = date.AddMinutes(45),
+                Uid = uid
+            };
+
+            var calendar = new Ical.Net.Calendar();
+            calendar.AddTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
+            calendar.Events.Add(@event);
+
+            var serializer = new CalendarSerializer();
+            var body = serializer.SerializeToString(calendar);
+
+            await client.CreateEventAsync(defaultVCalendar.Uri, uid, body);
+
+            var loadedEvent = await client.GetEventAsync(defaultVCalendar.Uri, $"{defaultVCalendar.Uri}{uid}.ics");
+
+            //if (loadedEvent != null)
+            //    await loadedEvent.Delete(client);
         }
     }
 

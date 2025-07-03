@@ -16,11 +16,11 @@ public class Client
 
     public async Task<string?> GetPrincipalNameAsync(CancellationToken cancellationToken = default)
     {
-        var body = BodyBuilder.BuildCurrentUserPrincipalPropfindBody();
-
-        var request = _client.BuildPropfindRequestMessage("", body)
+        var request = new HttpRequestMessage(CalDavClient.Propfind, "")
             .WithDepth(0)
             .WithBasicAuthorization(_token);
+
+        request.Content = BuildBodyHelper.BuildCurrentUserPrincipalPropfindBody().ToStringContent();
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -36,9 +36,9 @@ public class Client
 
     public async Task<Principal?> GetPrincipalAsync(string upn, CancellationToken cancellationToken = default)
     {
-        var body = BodyBuilder.BuildAllPropPropfindBody();
+        var body = BuildBodyHelper.BuildAllPropPropfindBody();
 
-        var request = _client.BuildPropfindRequestMessage(upn, body)
+        var request = new HttpRequestMessage(CalDavClient.Propfind, upn)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
@@ -50,39 +50,44 @@ public class Client
         return null;
     }
 
-    public async Task<List<VCalendar>?> GetCalendarsAsync(
+    public async Task<List<Calendar>> GetCalendarsAsync(
         string calendarHomeSet,
         XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = _client.BuildPropfindRequestMessage(calendarHomeSet, body)
+        var request = new HttpRequestMessage(CalDavClient.Propfind, calendarHomeSet)
             .WithBasicAuthorization(_token);
+
+        request.Content = body.ToStringContent();
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsSuccess) return null;
+        if (!response.IsSuccess)
+            return [];
 
-        List<VCalendar> calendars = [];
+        List<Calendar> calendars = [];
 
         foreach (var entry in response.Entries)
         {
             // Only if entry has d:resource-type with d:calendar child
             if (entry.IsCalendar)
             {
-                calendars.Add(new VCalendar(entry));
+                calendars.Add(new Calendar(entry));
             }
         }
 
         return calendars;
     }
 
-    public async Task<VCalendar?> GetCalendarByUriAsync(string uri,
+    public async Task<Calendar?> GetCalendarByUriAsync(string uri,
         XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = _client.BuildPropfindRequestMessage(uri, body)
+        var request = new HttpRequestMessage(CalDavClient.Propfind, uri)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
+
+        request.Content = body.ToStringContent();
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
@@ -91,34 +96,92 @@ public class Client
             response.Entries.FirstOrDefault() is MultistatusEntry entry &&
             entry.IsCalendar)
         {
-            return new VCalendar(entry);
+            return new Calendar(entry);
         }
 
         return null;
     }
 
-    public async Task<List<VEvent>?> GetEventsAsync(string uri,
-        XDocument body,
+    public async Task<List<Event>> GetEventsAsync(string uri, XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = _client.BuildReportRequestMessage(uri, body)
+        var request = new HttpRequestMessage(CalDavClient.Report, uri)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
+
+        request.Content = body.ToStringContent();
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccess)
-        {
-            return null;
-        }
+            return [];
 
-        List<VEvent> events = [];
+        List<Event> events = [];
 
         foreach (var entry in response.Entries)
         {
-            events.Add(new VEvent(entry));
+            events.Add(new Event(entry));
         }
 
         return events;
+    }
+
+    public async Task<Event?> GetEventAsync(string uri, XDocument body,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(CalDavClient.Report, uri)
+            .WithDepth(0)
+            .WithBasicAuthorization(_token);
+
+        request.Content = body.ToStringContent();
+
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+        if (!response.IsSuccess)
+            return null;
+
+        return response.Entries.Count > 0
+            ? new Event(response.Entries.First())
+            : null;
+    }
+
+    public Task<Event?> GetEventAsync(string uri, string eventUri,
+        CancellationToken cancellationToken = default)
+        => GetEventAsync(uri, BuildBodyHelper.BuildCalendarMultigetBody(eventUri));
+
+    public async Task<bool> CreateEventAsync(string uri, string uid, string body,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, $"{uri}{uid}.ics")
+            .WithBasicAuthorization(_token);
+
+        request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
+
+        var response = await _client.PutAsync(request, cancellationToken);
+        return response.IsSuccess;
+    }
+
+    public async Task<bool> UpdateEventAsync(string uri, string etag, string body,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Put, uri)
+            .WithETag(etag)
+            .WithBasicAuthorization(_token);
+
+        request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
+
+        var response = await _client.PutAsync(request, cancellationToken);
+        return response.IsSuccess;
+    }
+
+    public async Task<bool> DeleteEventAsync(string uri, string etag,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Delete, uri)
+            .WithETag(etag)
+            .WithBasicAuthorization(_token);
+
+        var response = await _client.DeleteAsync(request, cancellationToken);
+        return response.IsSuccess;
     }
 }
