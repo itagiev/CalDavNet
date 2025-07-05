@@ -71,5 +71,5 @@ public class CompFilterBuilder
         return this;
     }
 
-    // TODO: add more prop filters
+    // TODO: Add more component filters
 }

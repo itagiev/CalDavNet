@@ -16,7 +16,7 @@ public static class HttpRequestMessageExtensions
         return request;
     }
 
-    public static HttpRequestMessage WithETag(this HttpRequestMessage request, string etag)
+    public static HttpRequestMessage WithEtag(this HttpRequestMessage request, string etag)
     {
         request.Headers.Add("If-Match", $"\"{etag}\"");
         return request;

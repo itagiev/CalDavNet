@@ -4,7 +4,7 @@ namespace CalDavNet;
 
 public class MultistatusEntry
 {
-    public string Uri { get; init; } = null!;
+    public string Href { get; init; } = null!;
 
     public IReadOnlyDictionary<XName, XElement> Properties { get; init; } = null!;
 

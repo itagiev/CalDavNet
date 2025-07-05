@@ -1,11 +1,16 @@
 using System.Xml.Linq;
 
+using Ical.Net.CalendarComponents;
+using Ical.Net.Serialization;
+
 namespace CalDavNet;
 
 public class Event : IEntity
 {
     private string? _etag;
     private string? _calendarData;
+
+    private readonly CalendarEvent? _event;
 
     public string? Etag
     {
@@ -33,30 +38,39 @@ public class Event : IEntity
         }
     }
 
-    public Event(MultistatusEntry entry)
-    {
-        Uri = entry.Uri;
-        Properties = entry.Properties;
-    }
-
-    public string Uri { get; } = null!;
+    public string Href { get; } = null!;
 
     public IReadOnlyDictionary<XName, XElement> Properties { get; }
 
-    // TODO: implement
+    public Event(MultistatusEntry entry)
+    {
+        Href = entry.Href;
+        Properties = entry.Properties;
+
+        if (!string.IsNullOrEmpty(CalendarData))
+        {
+            _event = Ical.Net.Calendar.Load(CalendarData).Events.SingleOrDefault();
+        }
+    }
+
     public Task Update(Client client, CancellationToken cancellationToken = default)
     {
         if (Etag == null || CalendarData == null)
             throw new InvalidOperationException("Event data was not loaded.");
 
-        return client.UpdateEventAsync(Uri, Etag, "", cancellationToken);
+        return client.UpdateEventAsync(Href, Etag, Serialize(), cancellationToken);
     }
 
     public Task Delete(Client client, CancellationToken cancellationToken = default)
     {
         if (Etag == null)
-            throw new InvalidOperationException("ETag was not loaded.");
+            throw new InvalidOperationException("Etag was not loaded.");
 
-        return client.DeleteEventAsync(Uri, Etag, cancellationToken);
+        return client.DeleteEventAsync(Href, Etag, cancellationToken);
+    }
+
+    public string Serialize()
+    {
+        return Calendar.CalendarSerializer.SerializeToString(_event);
     }
 }

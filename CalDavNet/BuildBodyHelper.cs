@@ -82,10 +82,10 @@ public static class BuildBodyHelper
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), calendarQuery);
     }
 
-    public static XDocument BuildCalendarMultigetBody(params string[] uris)
-        => BuildCalendarMultigetBody(uris.AsEnumerable());
+    public static XDocument BuildCalendarMultigetBody(params string[] hrefCollection)
+        => BuildCalendarMultigetBody(hrefCollection.AsEnumerable());
 
-    public static XDocument BuildCalendarMultigetBody(IEnumerable<string> uris)
+    public static XDocument BuildCalendarMultigetBody(IEnumerable<string> hrefCollection)
     {
         var multiget = new XElement(XNames.CalendarMultiget,
             new XAttribute(XNamespace.Xmlns + Constants.Dav.Prefix, Constants.Dav.Namespace),
@@ -97,8 +97,8 @@ public static class BuildBodyHelper
 
         multiget.Add(prop);
 
-        foreach (var uri in uris)
-            multiget.Add(new XElement(XNames.Href, uri));
+        foreach (var href in hrefCollection)
+            multiget.Add(new XElement(XNames.Href, href));
 
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), multiget);
     }

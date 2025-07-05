@@ -27,7 +27,7 @@ public class MultistatusResponse : Response
     {
         return new MultistatusEntry
         {
-            Uri = response.Element(XNames.Href)!.Value,
+            Href = response.Element(XNames.Href)!.Value,
             Properties = response.Elements()
                 .Where(x => x.Name == XNames.Propstat)
                 .Where(x =>

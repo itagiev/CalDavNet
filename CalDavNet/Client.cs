@@ -14,6 +14,10 @@ public class Client
         _token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
     }
 
+    /// <summary>
+    /// Gets current user principal name of a given client and credentials.
+    /// </summary>
+    /// <returns>Principal name (e.g. /principals/users/john@mail.com/)</returns>
     public async Task<string?> GetPrincipalNameAsync(CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Propfind, "")
@@ -34,6 +38,11 @@ public class Client
         return null;
     }
 
+    /// <summary>
+    /// Gets principal data,
+    /// like display name, calendar home set.
+    /// </summary>
+    /// <param name="upn">User principal name.</param>
     public async Task<Principal?> GetPrincipalAsync(string upn, CancellationToken cancellationToken = default)
     {
         var body = BuildBodyHelper.BuildAllPropPropfindBody();
@@ -50,12 +59,17 @@ public class Client
         return null;
     }
 
+    /// <summary>
+    /// Gets calendars list.
+    /// </summary>
+    /// <param name="href">Principal calendar home set href (e.g. /calendars/john@mail.com/).</param>
+    /// <param name="body">Request body, with requested properties.</param>
     public async Task<List<Calendar>> GetCalendarsAsync(
-        string calendarHomeSet,
+        string href,
         XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(CalDavClient.Propfind, calendarHomeSet)
+        var request = new HttpRequestMessage(CalDavClient.Propfind, href)
             .WithBasicAuthorization(_token);
 
         request.Content = body.ToStringContent();
@@ -79,11 +93,16 @@ public class Client
         return calendars;
     }
 
-    public async Task<Calendar?> GetCalendarByUriAsync(string uri,
+    /// <summary>
+    /// Gets a single calendar by it's href.
+    /// </summary>
+    /// <param name="href">Calendar href (e.g. /calendars/john@mail.com/events-27560559/).</param>
+    /// <param name="body">Request body, with requested properties.</param>
+    public async Task<Calendar?> GetCalendarAsync(string href,
         XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(CalDavClient.Propfind, uri)
+        var request = new HttpRequestMessage(CalDavClient.Propfind, href)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
@@ -102,10 +121,17 @@ public class Client
         return null;
     }
 
-    public async Task<List<Event>> GetEventsAsync(string uri, XDocument body,
+    /// <summary>
+    /// TODO:
+    /// </summary>
+    /// <param name="href"></param>
+    /// <param name="body"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<List<Event>> GetEventsAsync(string href, XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(CalDavClient.Report, uri)
+        var request = new HttpRequestMessage(CalDavClient.Report, href)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
@@ -126,10 +152,16 @@ public class Client
         return events;
     }
 
-    public async Task<Event?> GetEventAsync(string uri, XDocument body,
+    /// <summary>
+    /// Finds a single event by multiget body <see cref="BuildBodyHelper.BuildCalendarMultigetBody(string[])"/>.
+    /// Request body should contain only one href (of requested event), method returns only first event even if more requested.
+    /// </summary>
+    /// <param name="href">Calendar href.</param>
+    /// <param name="body">Multiget body.</param>
+    public async Task<Event?> GetEventAsync(string href, XDocument body,
         CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(CalDavClient.Report, uri)
+        var request = new HttpRequestMessage(CalDavClient.Report, href)
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
@@ -145,14 +177,24 @@ public class Client
             : null;
     }
 
-    public Task<Event?> GetEventAsync(string uri, string eventUri,
+    /// <summary>
+    /// Finds a single event by it's href.
+    /// </summary>
+    /// <param name="calendarHref">Calendar href.</param>
+    /// <param name="eventHref">Event href.</param>
+    public Task<Event?> GetEventAsync(string calendarHref, string eventHref,
         CancellationToken cancellationToken = default)
-        => GetEventAsync(uri, BuildBodyHelper.BuildCalendarMultigetBody(eventUri));
+        => GetEventAsync(calendarHref, BuildBodyHelper.BuildCalendarMultigetBody(eventHref));
 
-    public async Task<bool> CreateEventAsync(string uri, string uid, string body,
+    /// <summary>
+    /// Creates calendar event.
+    /// </summary>
+    /// <param name="href">Event href (e.g. /calendars/john@mail.com/events-27560559/oeibm394kvocows3lgjn.ics).</param>
+    /// <param name="body">Event body.</param>
+    public async Task<bool> CreateEventAsync(string href, string body,
         CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, $"{uri}{uid}.ics")
+        var request = new HttpRequestMessage(HttpMethod.Put, href)
             .WithBasicAuthorization(_token);
 
         request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
@@ -161,11 +203,17 @@ public class Client
         return response.IsSuccess;
     }
 
-    public async Task<bool> UpdateEventAsync(string uri, string etag, string body,
+    /// <summary>
+    /// Updates calendar event.
+    /// </summary>
+    /// <param name="href">Event href (e.g. /calendars/john@mail.com/events-27560559/oeibm394kvocows3lgjn.ics).</param>
+    /// <param name="etag">Event "version"</param>
+    /// <param name="body">Event body.</param>
+    public async Task<bool> UpdateEventAsync(string href, string etag, string body,
         CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, uri)
-            .WithETag(etag)
+        var request = new HttpRequestMessage(HttpMethod.Put, href)
+            .WithEtag(etag)
             .WithBasicAuthorization(_token);
 
         request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
@@ -174,11 +222,16 @@ public class Client
         return response.IsSuccess;
     }
 
-    public async Task<bool> DeleteEventAsync(string uri, string etag,
+    /// <summary>
+    /// Deletes calendar event.
+    /// </summary>
+    /// <param name="href">Event href (e.g. /calendars/john@mail.com/events-27560559/oeibm394kvocows3lgjn.ics).</param>
+    /// <param name="etag">Event "version".</param>
+    public async Task<bool> DeleteEventAsync(string href, string etag,
         CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, uri)
-            .WithETag(etag)
+        var request = new HttpRequestMessage(HttpMethod.Delete, href)
+            .WithEtag(etag)
             .WithBasicAuthorization(_token);
 
         var response = await _client.DeleteAsync(request, cancellationToken);

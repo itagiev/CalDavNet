@@ -4,9 +4,23 @@ namespace CalDavNet;
 
 public class Principal : IEntity
 {
+    private string? _displayName;
     private string? _calendarHomeSet;
 
-    public string Uri { get; } = null!;
+    public string Href { get; } = null!;
+
+    public string? DisplayName
+    {
+        get
+        {
+            if (_displayName is null && Properties.TryGetValue(XNames.DisplayName, out var element))
+            {
+                _displayName = element.Value;
+            }
+
+            return _displayName;
+        }
+    }
 
     public string? CalendarHomeSet
     {
@@ -23,7 +37,7 @@ public class Principal : IEntity
 
     public Principal(MultistatusEntry entry)
     {
-        Uri = entry.Uri;
+        Href = entry.Href;
         Properties = entry.Properties;
     }
 
