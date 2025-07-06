@@ -72,7 +72,7 @@ class Program
 
         // TEST: Getting calendars
         var calendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
-            BuildBodyHelper.BuildPropfindBody([], [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken]));
+            BuildBodyHelper.BuildPropfindBody([], [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet]));
 
         Console.WriteLine();
         if (calendars.Count > 0)
@@ -126,17 +126,17 @@ class Program
             throw;
         }
 
-        Console.WriteLine();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("Processing calendar logic\n");
+        //Console.WriteLine();
+        //Console.WriteLine("-----------------------------------------");
+        //Console.WriteLine("Processing calendar logic\n");
 
-        await ProcessCalendarLogic(client, defaultCalendar);
+        //await ProcessCalendarLogic(client, defaultCalendar);
 
-        Console.WriteLine();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("Processing event logic\n");
+        //Console.WriteLine();
+        //Console.WriteLine("-----------------------------------------");
+        //Console.WriteLine("Processing event logic\n");
 
-        await ProcessEventLogic(client, defaultCalendar);
+        //await ProcessEventLogic(client, defaultCalendar);
 
     }
 
@@ -144,7 +144,7 @@ class Program
     {
         // TEST: Getting filtered events
         var filter = new FilterBuilder()
-            .AddCompFilter(new CompFilterBuilder(Constants.CompFilter.VEVENT)
+            .AddCompFilter(new CompFilterBuilder(Constants.Comp.VEVENT)
                 .AddTimeRange(DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow.AddMonths(1))
                 .ToXElement);
 

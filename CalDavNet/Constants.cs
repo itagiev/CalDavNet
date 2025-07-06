@@ -77,7 +77,7 @@ public static class Constants
         public const string CalendarEnabled = "calendar-enabled";
     }
 
-    public static class CompFilter
+    public static class Comp
     {
         /// <summary>
         /// Календарь.

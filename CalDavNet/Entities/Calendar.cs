@@ -9,9 +9,23 @@ public class Calendar : IEntity
 {
     internal static readonly CalendarSerializer CalendarSerializer = new CalendarSerializer();
 
+    private string? _displayName;
     private string? _ctag;
     private string? _syncToken;
-    private string? _displayName;
+    private CalendarComponent _supportedCalendarComponentSet = CalendarComponent.None;
+
+    public string? DisplayName
+    {
+        get
+        {
+            if (_displayName is null && Properties.TryGetValue(XNames.DisplayName, out var element))
+            {
+                _displayName = element.Value;
+            }
+
+            return _displayName;
+        }
+    }
 
     public string? Ctag
     {
@@ -39,16 +53,41 @@ public class Calendar : IEntity
         }
     }
 
-    public string? DisplayName
+    public CalendarComponent SupportedCalendarComponentSet
     {
         get
         {
-            if (_displayName is null && Properties.TryGetValue(XNames.DisplayName, out var element))
+            if (Properties.TryGetValue(XNames.SupportedCalendarComponentSet, out var element))
             {
-                _displayName = element.Value;
+                foreach (var comp in element.Elements(XNames.Comp))
+                {
+                    if (comp.Attribute("name") is XAttribute attr)
+                    {
+                        switch (attr.Value)
+                        {
+                            case Constants.Comp.VEVENT:
+                                _supportedCalendarComponentSet |= CalendarComponent.VEVENT;
+                                break;
+                            case Constants.Comp.VTODO:
+                                _supportedCalendarComponentSet |= CalendarComponent.VTODO;
+                                break;
+                            case Constants.Comp.VJOURNAL:
+                                _supportedCalendarComponentSet |= CalendarComponent.VJOURNAL;
+                                break;
+                            case Constants.Comp.VFREEBUSY:
+                                _supportedCalendarComponentSet |= CalendarComponent.VFREEBUSY;
+                                break;
+                            case Constants.Comp.VALARM:
+                                _supportedCalendarComponentSet |= CalendarComponent.VALARM;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
             }
 
-            return _displayName;
+            return _supportedCalendarComponentSet;
         }
     }
 
@@ -74,6 +113,11 @@ public class Calendar : IEntity
 
         var eventHref = $"{Href}{@event.Uid}.ics";
         return client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(_calendar), cancellationToken);
+    }
+
+    public bool IsComponentSupported(CalendarComponent component)
+    {
+        return (component & SupportedCalendarComponentSet) == component;
     }
 
     public Task<List<Event>> GetEventsAsync(Client client, XDocument body, CancellationToken cancellationToken = default)

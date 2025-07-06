@@ -5,7 +5,7 @@ namespace CalDavNet;
 public class FilterBuilder
 {
     private readonly XElement _filter = new XElement(XNames.Filter);
-    private readonly XElement _vcalendar = new XElement(XNames.CompFilter, new XAttribute("name", Constants.CompFilter.VCALENDAR));
+    private readonly XElement _vcalendar = new XElement(XNames.CompFilter, new XAttribute("name", Constants.Comp.VCALENDAR));
 
     public FilterBuilder()
     {
