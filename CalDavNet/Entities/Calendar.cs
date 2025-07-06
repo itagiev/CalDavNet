@@ -12,7 +12,6 @@ public class Calendar : IEntity
     private string? _ctag;
     private string? _syncToken;
     private string? _displayName;
-    private string? _timezone;
 
     public string? Ctag
     {
@@ -53,19 +52,6 @@ public class Calendar : IEntity
         }
     }
 
-    public string? Timezone
-    {
-        get
-        {
-            if (_timezone is null && Properties.TryGetValue(XNames.CalendarTimezone, out var element))
-            {
-                _timezone = element.Value;
-            }
-
-            return _timezone;
-        }
-    }
-
     public string Href { get; } = null!;
 
     public IReadOnlyDictionary<XName, XElement> Properties { get; }
@@ -80,18 +66,19 @@ public class Calendar : IEntity
         _calendar.AddTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
     }
 
-    public async Task<Event?> CreateEventAsync(Client client, CalendarEvent @event,
+    public Task<bool> CreateEventAsync(Client client, CalendarEvent @event,
         CancellationToken cancellationToken = default)
     {
+        _calendar.Events.Clear();
+        _calendar.Events.Add(@event);
+
         var eventHref = $"{Href}{@event.Uid}.ics";
-        var result = await client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(@event), cancellationToken);
+        return client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(_calendar), cancellationToken);
+    }
 
-        if (result)
-        {
-            return await GetEventAsync(client, eventHref, cancellationToken);
-        }
-
-        return null;
+    public Task<List<Event>> GetEventsAsync(Client client, XDocument body, CancellationToken cancellationToken = default)
+    {
+        return client.GetEventsAsync(Href, body, cancellationToken);
     }
 
     public Task<Event?> GetEventAsync(Client client, XDocument body, CancellationToken cancellationToken = default)
@@ -103,18 +90,4 @@ public class Calendar : IEntity
     {
         return client.GetEventAsync(Href, eventHref, cancellationToken);
     }
-
-    //public async Task<bool> CreateEventAsync(Client client, CalendarEvent @event)
-    //{
-
-    //    var serializer = new CalendarSerializer();
-    //    var body = serializer.SerializeToString(calendar);
-
-    //    await client.CreateEventAsync(Href, uid, body);
-    //}
-
-    //public async Task<Event> GetEventsAsync(Client client)
-    //{
-    //    throw new NotImplementedException();
-    //}
 }

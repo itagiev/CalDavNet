@@ -1,16 +1,11 @@
 using System.Xml.Linq;
 
-using Ical.Net.CalendarComponents;
-using Ical.Net.Serialization;
-
 namespace CalDavNet;
 
 public class Event : IEntity
 {
     private string? _etag;
     private string? _calendarData;
-
-    private readonly CalendarEvent? _event;
 
     public string? Etag
     {
@@ -42,6 +37,10 @@ public class Event : IEntity
 
     public IReadOnlyDictionary<XName, XElement> Properties { get; }
 
+    public Ical.Net.Calendar? ICalCalendar { get; }
+
+    public Ical.Net.CalendarComponents.CalendarEvent? ICalEvent { get; }
+
     public Event(MultistatusEntry entry)
     {
         Href = entry.Href;
@@ -49,11 +48,12 @@ public class Event : IEntity
 
         if (!string.IsNullOrEmpty(CalendarData))
         {
-            _event = Ical.Net.Calendar.Load(CalendarData).Events.SingleOrDefault();
+            ICalCalendar = Ical.Net.Calendar.Load(CalendarData);
+            ICalEvent = ICalCalendar.Events.SingleOrDefault();
         }
     }
 
-    public Task Update(Client client, CancellationToken cancellationToken = default)
+    public Task<bool> UpdateAsync(Client client, CancellationToken cancellationToken = default)
     {
         if (Etag == null || CalendarData == null)
             throw new InvalidOperationException("Event data was not loaded.");
@@ -61,7 +61,7 @@ public class Event : IEntity
         return client.UpdateEventAsync(Href, Etag, Serialize(), cancellationToken);
     }
 
-    public Task Delete(Client client, CancellationToken cancellationToken = default)
+    public Task<bool> DeleteAsync(Client client, CancellationToken cancellationToken = default)
     {
         if (Etag == null)
             throw new InvalidOperationException("Etag was not loaded.");
@@ -71,6 +71,6 @@ public class Event : IEntity
 
     public string Serialize()
     {
-        return Calendar.CalendarSerializer.SerializeToString(_event);
+        return Calendar.CalendarSerializer.SerializeToString(ICalCalendar);
     }
 }

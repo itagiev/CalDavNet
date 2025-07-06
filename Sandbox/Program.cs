@@ -1,9 +1,12 @@
+using System.Xml.Schema;
+
 using CalDavNet;
 
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Sandbox;
 
@@ -120,80 +123,136 @@ class Program
         catch
         {
             Console.WriteLine($"Calendar not found");
+            throw;
         }
 
-        return;
+        Console.WriteLine();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("Processing calendar logic\n");
 
+        await ProcessCalendarLogic(client, defaultCalendar);
+
+        Console.WriteLine();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("Processing event logic\n");
+
+        await ProcessEventLogic(client, defaultCalendar);
+
+    }
+
+    static async Task ProcessCalendarLogic(Client client, Calendar calendar)
+    {
+        // TEST: Getting filtered events
         var filter = new FilterBuilder()
             .AddCompFilter(new CompFilterBuilder(Constants.CompFilter.VEVENT)
                 .AddTimeRange(DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow.AddMonths(1))
                 .ToXElement);
 
-        var vevents = await client.GetEventsAsync(defaultCalendar.Href,
-            BuildBodyHelper.BuildCalendarQueryBody(filter.ToXElement));
+        var events = await calendar.GetEventsAsync(client, BuildBodyHelper.BuildCalendarQueryBody(filter.ToXElement));
 
-        ArgumentNullException.ThrowIfNull(vevents);
-
-        Console.WriteLine("\nEvents href list: ");
-
-        foreach (var vevent in vevents)
+        if (events.Count > 0)
         {
-            Console.WriteLine(vevent.Href);
-        }
+            Console.WriteLine("Event collection (loaded with calendar query body):");
 
-        {
-            var loadedVEvents = await client.GetEventsAsync(defaultCalendar.Href,
-                BuildBodyHelper.BuildCalendarMultigetBody(vevents.Select(x => x.Href)));
-
-            ArgumentNullException.ThrowIfNull(loadedVEvents);
-
-            Console.WriteLine("\nLoaded events by href: ");
-            Ical.Net.Calendar? calendar = null;
-
-            foreach (var vevent in loadedVEvents)
+            foreach (var @event in events)
             {
-                if (calendar is null)
-                {
-                    calendar = Ical.Net.Calendar.Load(vevent.CalendarData);
-                }
-                else
-                {
-                    calendar.MergeWith(Ical.Net.Calendar.Load(vevent.CalendarData));
-                }
+                Console.WriteLine(@event.Href);
             }
 
-            foreach (var e in calendar?.Events ?? Enumerable.Empty<CalendarEvent>())
+            Console.WriteLine();
+
+            events = await calendar.GetEventsAsync(client, BuildBodyHelper.BuildCalendarMultigetBody(events.Select(x => x.Href)));
+
+            if (events.Count > 0)
             {
-                Console.WriteLine($"Summary: {e.Summary}");
+                Console.WriteLine("Event collection (loaded with multiget body):");
+
+                foreach (var @event in events)
+                {
+                    if (@event.ICalCalendar != null)
+                    {
+                        Console.Write($"Events count: {@event.ICalCalendar.Events.Count}");
+
+                        if (@event.ICalEvent != null)
+                        {
+                            Console.Write($" Summary: {@event.ICalEvent.Summary}");
+                        }
+
+                        Console.WriteLine();
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Calendar has no events");
             }
         }
-
-        Console.WriteLine("\n====================================");
-        Console.WriteLine("Processing entity logic\n");
-        //await ProcessEntityLogic(client, defaultCalendar);
+        else
+        {
+            Console.WriteLine("Calendar is empty");
+        }
     }
 
-    static async Task ProcessEntityLogic(Client client, Calendar defaultCalendar,
-        CancellationToken cancellationToken = default)
+    static async Task ProcessEventLogic(Client client, Calendar calendar)
     {
-        var date = new CalDateTime(DateTime.UtcNow.AddHours(2));
+        // TEST: Getting events with calendar query body
+        var date = new CalDateTime(DateTime.UtcNow.AddHours(1));
         var calendarEvent = new CalendarEvent
         {
             // If Name property is used, it MUST be RFC 5545 compliant
-            Summary = "Spider-man", // Should always be present
+            Summary = "Spider-Man", // Should always be present
             Description = "Hobbit goes here", // optional
             Start = date,
             End = date.AddMinutes(45),
             Uid = Guid.NewGuid().ToString()
         };
 
-        var @event = await defaultCalendar.CreateEventAsync(client, calendarEvent);
+        Console.WriteLine("Creating event...");
 
-        ArgumentNullException.ThrowIfNull(@event);
+        var result = await calendar.CreateEventAsync(client, calendarEvent);
 
-        var loadedEvent = await defaultCalendar.GetEventAsync(client, @event.Href);
+        if (result)
+        {
+            Console.WriteLine($"Event created");
+        }
+        else
+        {
+            Console.WriteLine("Error occurred while creating event");
+        }
 
-        //if (loadedEvent != null)
-        //    await loadedEvent.Delete(client);
+        var @event = await calendar.GetEventAsync(client, $"{calendar.Href}{calendarEvent.Uid}.ics");
+
+        ArgumentNullException.ThrowIfNull(@event?.ICalEvent);
+
+        Console.WriteLine($"{@event.ICalEvent.Summary} loaded");
+
+        Console.WriteLine($"Event {@event.ICalEvent.Summary} created");
+
+        Console.WriteLine("Updating event...");
+
+        @event.ICalEvent.Summary = "New summary";
+        result = await @event.UpdateAsync(client);
+
+        if (result)
+        {
+            Console.WriteLine($"Event {@event.ICalEvent.Summary} updated");
+        }
+        else
+        {
+            Console.WriteLine("Error occurred while updating event");
+        }
+
+        Console.WriteLine("Deleting event...");
+
+        result = await @event.DeleteAsync(client);
+
+        if (result)
+        {
+            Console.WriteLine("Event deleted");
+        }
+        else
+        {
+            Console.WriteLine("Error occurred while deleting event");
+        }
     }
 }

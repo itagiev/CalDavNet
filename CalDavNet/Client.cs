@@ -60,10 +60,10 @@ public class Client
     }
 
     /// <summary>
-    /// Gets calendars list.
+    /// Gets calendar collection.
     /// </summary>
     /// <param name="href">Principal calendar home set href (e.g. /calendars/john@mail.com/).</param>
-    /// <param name="body">Request body, with requested properties.</param>
+    /// <param name="body">Request body with requested properties.</param>
     public async Task<List<Calendar>> GetCalendarsAsync(
         string href,
         XDocument body,
@@ -97,7 +97,7 @@ public class Client
     /// Gets a single calendar by it's href.
     /// </summary>
     /// <param name="href">Calendar href (e.g. /calendars/john@mail.com/events-27560559/).</param>
-    /// <param name="body">Request body, with requested properties.</param>
+    /// <param name="body">Request body with requested properties.</param>
     public async Task<Calendar?> GetCalendarAsync(string href,
         XDocument body,
         CancellationToken cancellationToken = default)
@@ -122,12 +122,10 @@ public class Client
     }
 
     /// <summary>
-    /// TODO:
+    /// Gets event collection within calendar.
     /// </summary>
-    /// <param name="href"></param>
-    /// <param name="body"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="href">Calendar href (e.g. /calendars/john@mail.com/events-27560559/).</param>
+    /// <param name="body">Request body with parameters and filters.</param>
     public async Task<List<Event>> GetEventsAsync(string href, XDocument body,
         CancellationToken cancellationToken = default)
     {
@@ -153,7 +151,7 @@ public class Client
     }
 
     /// <summary>
-    /// Finds a single event by multiget body <see cref="BuildBodyHelper.BuildCalendarMultigetBody(string[])"/>.
+    /// Gets a single event by multiget body <see cref="BuildBodyHelper.BuildCalendarMultigetBody(string[])"/>.
     /// Request body should contain only one href (of requested event), method returns only first event even if more requested.
     /// </summary>
     /// <param name="href">Calendar href.</param>
@@ -178,7 +176,7 @@ public class Client
     }
 
     /// <summary>
-    /// Finds a single event by it's href.
+    /// Gets a single event by it's href.
     /// </summary>
     /// <param name="calendarHref">Calendar href.</param>
     /// <param name="eventHref">Event href.</param>
