@@ -24,7 +24,7 @@ class Program
 
         var services = new ServiceCollection();
 
-        services.AddCalDav(options =>
+        services.AddCalDav("yandex", options =>
         {
             options.BaseAddress = new Uri("https://caldav.yandex.ru");
         });
@@ -32,7 +32,7 @@ class Program
         var provider = services.BuildServiceProvider();
 
         using var scope = provider.CreateScope();
-        var calDavClient = scope.ServiceProvider.GetRequiredService<CalDavClient>();
+        var calDavClient = scope.ServiceProvider.GetRequiredKeyedService<CalDavClient>("yandex");
         var client = new Client(calDavClient, Username, Password);
 
         await Process(client);

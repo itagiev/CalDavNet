@@ -1,11 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace CalDavNet;
 
-public class CalDavBuilder
+public class CalDavOptions
 {
-    public IServiceCollection Services { get; }
-
     /// <summary>
     /// CalDAV server (e.g. caldav.yandex.ru)
     /// </summary>
@@ -21,10 +17,4 @@ public class CalDavBuilder
     /// Default is "return-minimal"
     /// </summary>
     public string? Prefer { get; set; } = "return-minimal";
-
-    public CalDavBuilder(IServiceCollection services)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        Services = services;
-    }
 }

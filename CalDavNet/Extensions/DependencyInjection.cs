@@ -6,50 +6,30 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static CalDavBuilder AddCalDav(this IServiceCollection services)
+    public static void AddCalDav(this IServiceCollection services, string clientName, Action<CalDavOptions> configure)
     {
-        ArgumentNullException.ThrowIfNull(services);
+        var options = new CalDavOptions();
+        configure(options);
 
-        var builder = services
-            .LastOrDefault(x => x.ServiceType == typeof(CalDavBuilder))
-            ?.ImplementationInstance as CalDavBuilder;
-
-        if (builder is null)
-        {
-            builder = new CalDavBuilder(services);
-            services.AddSingleton(builder);
-        }
-
-        services.AddHttpClient(nameof(CalDavClient),
-            options =>
+        services.AddHttpClient(clientName,
+            client =>
             {
-                ArgumentNullException.ThrowIfNull(builder.BaseAddress);
-                options.BaseAddress = builder.BaseAddress;
+                ArgumentNullException.ThrowIfNull(options.BaseAddress);
+                client.BaseAddress = options.BaseAddress;
 
-                if (!string.IsNullOrEmpty(builder.Depth))
-                    options.DefaultRequestHeaders.Add("Depth", builder.Depth);
+                if (!string.IsNullOrEmpty(options.Depth))
+                    client.DefaultRequestHeaders.Add("Depth", options.Depth);
 
-                if (!string.IsNullOrEmpty(builder.Prefer))
-                    options.DefaultRequestHeaders.Add("Prefer", builder.Prefer);
+                if (!string.IsNullOrEmpty(options.Prefer))
+                    client.DefaultRequestHeaders.Add("Prefer", options.Prefer);
 
-                options.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             });
-            //.AddHttpMessageHandler<LoggingHandler>();
 
-        //services.AddSingleton<LoggingHandler>();
-        services.AddSingleton<CalDavClient>();
-
-        return builder;
-    }
-
-    public static CalDavBuilder AddCalDav(this IServiceCollection services, Action<CalDavBuilder> configure)
-    {
-        ArgumentNullException.ThrowIfNull(configure);
-
-        var builder = services.AddCalDav();
-
-        configure(builder);
-
-        return builder;
+        services.AddKeyedSingleton(clientName, (serviceProvider, _) =>
+        {
+            var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+            return new CalDavClient(httpClientFactory, clientName);
+        });
     }
 }
