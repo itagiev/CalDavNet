@@ -60,6 +60,24 @@ public class Client
     }
 
     /// <summary>
+    /// Creates new calendar.
+    /// </summary>
+    /// <param name="href">Principal calendar home set href (e.g. /calendars/john@mail.com/).</param>
+    /// <param name="body">Request body.</param>
+    public async Task<bool> CreateCalendarAsync(string href, XDocument body, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(CalDavClient.Mkcalendar, $"{href}events/")
+        {
+            Content = body.ToStringContent()
+        }
+        .WithDepth(0)
+        .WithBasicAuthorization(_token);
+
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        return response.IsSuccess;
+    }
+
+    /// <summary>
     /// Gets calendar collection.
     /// </summary>
     /// <param name="href">Principal calendar home set href (e.g. /calendars/john@mail.com/).</param>
@@ -197,7 +215,7 @@ public class Client
 
         request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
 
-        var response = await _client.PutAsync(request, cancellationToken);
+        var response = await _client.SendAsync2(request, cancellationToken);
         return response.IsSuccess;
     }
 
@@ -216,7 +234,7 @@ public class Client
 
         request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
 
-        var response = await _client.PutAsync(request, cancellationToken);
+        var response = await _client.SendAsync2(request, cancellationToken);
         return response.IsSuccess;
     }
 
@@ -232,7 +250,7 @@ public class Client
             .WithEtag(etag)
             .WithBasicAuthorization(_token);
 
-        var response = await _client.DeleteAsync(request, cancellationToken);
+        var response = await _client.SendAsync2(request, cancellationToken);
         return response.IsSuccess;
     }
 }

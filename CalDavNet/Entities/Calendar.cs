@@ -9,7 +9,11 @@ public class Calendar : IEntity
 {
     internal static readonly CalendarSerializer CalendarSerializer = new CalendarSerializer();
 
+    private readonly Ical.Net.Calendar _calendar;
+
     private string? _displayName;
+    private string? _description;
+    private string? _color;
     private string? _ctag;
     private string? _syncToken;
     private CalendarComponent _supportedCalendarComponentSet = CalendarComponent.None;
@@ -24,6 +28,32 @@ public class Calendar : IEntity
             }
 
             return _displayName;
+        }
+    }
+
+    public string? Description
+    {
+        get
+        {
+            if (_description is null && Properties.TryGetValue(XNames.CalendarDescription, out var element))
+            {
+                _description = element.Value;
+            }
+
+            return _description;
+        }
+    }
+
+    public string? Color
+    {
+        get
+        {
+            if (_color is null && Properties.TryGetValue(XNames.CalendarColor, out var element))
+            {
+                _color = element.Value;
+            }
+
+            return _color;
         }
     }
 
@@ -94,8 +124,6 @@ public class Calendar : IEntity
     public string Href { get; } = null!;
 
     public IReadOnlyDictionary<XName, XElement> Properties { get; }
-
-    private readonly Ical.Net.Calendar _calendar;
 
     public Calendar(MultistatusEntry entry)
     {

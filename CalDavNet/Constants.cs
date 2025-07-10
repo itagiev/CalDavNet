@@ -16,6 +16,7 @@ public static class Constants
         public const string Status = "status";
         public const string Propstat = "propstat";
         public const string Prop = "prop";
+        public const string Set = "set";
         public const string ResourceType = "resourcetype";
         public const string GetContentType = "getcontenttype";
         public const string Collection = "collection";
@@ -48,6 +49,7 @@ public static class Constants
         public const string Calendar = "calendar";
         public const string CalendarQuery = "calendar-query";
         public const string CalendarMultiget = "calendar-multiget";
+        public const string Mkcalendar = "mkcalendar";
         public const string Filter = "filter";
         public const string Comp = "comp";
         public const string CompFilter = "comp-filter";
@@ -144,6 +146,8 @@ public static class XNames
 
     public static XName Prop => XName.Get(Constants.Dav.Prop, Constants.Dav.Namespace);
 
+    public static XName Set => XName.Get(Constants.Dav.Set, Constants.Dav.Namespace);
+
     public static XName ResourceType => XName.Get(Constants.Dav.ResourceType, Constants.Dav.Namespace);
 
     public static XName GetContentType => XName.Get(Constants.Dav.GetContentType, Constants.Dav.Namespace);
@@ -187,6 +191,8 @@ public static class XNames
     public static XName CalendarQuery => XName.Get(Constants.Cal.CalendarQuery, Constants.Cal.Namespace);
 
     public static XName CalendarMultiget => XName.Get(Constants.Cal.CalendarMultiget, Constants.Cal.Namespace);
+
+    public static XName Mkcalendar => XName.Get(Constants.Cal.Mkcalendar, Constants.Cal.Namespace);
 
     public static XName Filter => XName.Get(Constants.Cal.Filter, Constants.Cal.Namespace);
 

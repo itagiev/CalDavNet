@@ -1,12 +1,9 @@
-using System.Xml.Schema;
-
 using CalDavNet;
 
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Sandbox;
 
@@ -35,7 +32,7 @@ class Program
         var calDavClient = scope.ServiceProvider.GetRequiredKeyedService<CalDavClient>("yandex");
         var client = new Client(calDavClient, Username, Password);
 
-        await Process(client);
+        //await Process(client);
 
         #region Filter Test
 
@@ -72,7 +69,8 @@ class Program
 
         // TEST: Getting calendars
         var calendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
-            BuildBodyHelper.BuildPropfindBody([], [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet]));
+            BuildBodyHelper.BuildPropfindBody([],
+                [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet, XNames.DisplayName]));
 
         Console.WriteLine();
         if (calendars.Count > 0)
@@ -81,7 +79,7 @@ class Program
 
             foreach (var calendar in calendars)
             {
-                Console.WriteLine(calendar.Href);
+                Console.WriteLine($"{calendar.DisplayName} - {calendar.Href}");
             }
         }
         else
@@ -128,16 +126,25 @@ class Program
 
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
-        //Console.WriteLine("Processing calendar logic\n");
+        //Console.WriteLine("Processing mailbox logic\n");
+        //await ProcessMailboxLogic(client, principal.CalendarHomeSet);
 
+        //Console.WriteLine();
+        //Console.WriteLine("-----------------------------------------");
+        //Console.WriteLine("Processing calendar logic\n");
         //await ProcessCalendarLogic(client, defaultCalendar);
 
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
         //Console.WriteLine("Processing event logic\n");
-
         //await ProcessEventLogic(client, defaultCalendar);
+    }
 
+    static async Task ProcessMailboxLogic(Client client, string calendarHomeSet)
+    {
+        var body = BuildBodyHelper.BuildMkcalendarBody("Новый календарь", Constants.Comp.VEVENT);
+        var result = await client.CreateCalendarAsync(calendarHomeSet, body);
+        Console.WriteLine(result);
     }
 
     static async Task ProcessCalendarLogic(Client client, Calendar calendar)
