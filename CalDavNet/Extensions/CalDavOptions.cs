@@ -17,4 +17,9 @@ public class CalDavOptions
     /// Default is "return-minimal"
     /// </summary>
     public string? Prefer { get; set; } = "return-minimal";
+
+    /// <summary>
+    /// Adds <see cref="LoggingHandler"/>.
+    /// </summary>
+    public bool EnableLoggingHandler { get; set; } = false;
 }

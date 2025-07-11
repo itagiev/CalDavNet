@@ -28,14 +28,10 @@ public class Client
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (response.IsSuccess
-            && response.Entries.FirstOrDefault() is MultistatusEntry entry
-            && entry.Properties.TryGetValue(XNames.CurrentUserPrincipal, out var element))
-        {
-            return element.Value;
-        }
-
-        return null;
+        return response.Entries.FirstOrDefault() is MultistatusEntry entry
+            && entry.Properties.TryGetValue(XNames.CurrentUserPrincipal, out var prop) && prop.IsSuccessful
+            ? prop.Prop.Value
+            : null;
     }
 
     /// <summary>
@@ -53,28 +49,9 @@ public class Client
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (response.IsSuccess && response.Entries.FirstOrDefault() is MultistatusEntry entry)
-            return new Principal(entry);
-
-        return null;
-    }
-
-    /// <summary>
-    /// Creates new calendar.
-    /// </summary>
-    /// <param name="href">Principal calendar home set href (e.g. /calendars/john@mail.com/).</param>
-    /// <param name="body">Request body.</param>
-    public async Task<bool> CreateCalendarAsync(string href, XDocument body, CancellationToken cancellationToken = default)
-    {
-        var request = new HttpRequestMessage(CalDavClient.Mkcalendar, $"{href}events/")
-        {
-            Content = body.ToStringContent()
-        }
-        .WithDepth(0)
-        .WithBasicAuthorization(_token);
-
-        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        return response.IsSuccess;
+        return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessful
+            ? new Principal(entry)
+            : null;
     }
 
     /// <summary>
@@ -94,21 +71,10 @@ public class Client
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsSuccess)
-            return [];
-
-        List<Calendar> calendars = [];
-
-        foreach (var entry in response.Entries)
-        {
-            // Only if entry has d:resource-type with d:calendar child
-            if (entry.IsCalendar)
-            {
-                calendars.Add(new Calendar(entry));
-            }
-        }
-
-        return calendars;
+        return response.Entries
+            .Where(e => e.IsCalendar && e.IsSuccessful)
+            .Select(e => new Calendar(e))
+            .ToList();
     }
 
     /// <summary>
@@ -129,14 +95,31 @@ public class Client
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         // Only if success, result not empty and has d:resource-type with d:calendar child
-        if (response.IsSuccess &&
-            response.Entries.FirstOrDefault() is MultistatusEntry entry &&
-            entry.IsCalendar)
+        if (response.Entries.FirstOrDefault() is MultistatusEntry entry &&
+            entry.IsCalendar && entry.IsSuccessful)
         {
             return new Calendar(entry);
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Creates new calendar.
+    /// </summary>
+    /// <param name="href">Principal calendar home set href (e.g. /calendars/john@mail.com/).</param>
+    /// <param name="body">Request body.</param>
+    public async Task<bool> CreateCalendarAsync(string href, XDocument body, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(CalDavClient.Mkcalendar, $"{href}events/")
+        {
+            Content = body.ToStringContent()
+        }
+        .WithDepth(0)
+        .WithBasicAuthorization(_token);
+
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        return response.IsSuccessStatusCode;
     }
 
     /// <summary>
@@ -155,17 +138,10 @@ public class Client
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsSuccess)
-            return [];
-
-        List<Event> events = [];
-
-        foreach (var entry in response.Entries)
-        {
-            events.Add(new Event(entry));
-        }
-
-        return events;
+        return response.Entries
+            .Where(e => e.IsSuccessful)
+            .Select(e => new Event(e))
+            .ToList();
     }
 
     /// <summary>
@@ -185,11 +161,8 @@ public class Client
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsSuccess)
-            return null;
-
-        return response.Entries.Count > 0
-            ? new Event(response.Entries.First())
+        return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessful
+            ? new Event(entry)
             : null;
     }
 
@@ -216,7 +189,7 @@ public class Client
         request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
 
         var response = await _client.SendAsync2(request, cancellationToken);
-        return response.IsSuccess;
+        return response.IsSuccessStatusCode;
     }
 
     /// <summary>
@@ -235,7 +208,7 @@ public class Client
         request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
 
         var response = await _client.SendAsync2(request, cancellationToken);
-        return response.IsSuccess;
+        return response.IsSuccessStatusCode;
     }
 
     /// <summary>
@@ -251,6 +224,6 @@ public class Client
             .WithBasicAuthorization(_token);
 
         var response = await _client.SendAsync2(request, cancellationToken);
-        return response.IsSuccess;
+        return response.IsSuccessStatusCode;
     }
 }

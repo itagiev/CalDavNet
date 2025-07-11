@@ -11,9 +11,11 @@ public class Event : IEntity
     {
         get
         {
-            if (_etag is null && Properties.TryGetValue(XNames.GetEtag, out var element))
+            if (_etag is null &&
+                Properties.TryGetValue(XNames.GetEtag, out var prop)
+                && prop.IsSuccessful)
             {
-                _etag = element.Value;
+                _etag = prop.Prop.Value;
             }
 
             return _etag;
@@ -24,9 +26,11 @@ public class Event : IEntity
     {
         get
         {
-            if (_calendarData is null && Properties.TryGetValue(XNames.CalendarData, out var element))
+            if (_calendarData is null &&
+                Properties.TryGetValue(XNames.CalendarData, out var prop)
+                && prop.IsSuccessful)
             {
-                _calendarData = element.Value;
+                _calendarData = prop.Prop.Value;
             }
 
             return _calendarData;
@@ -35,7 +39,7 @@ public class Event : IEntity
 
     public string Href { get; } = null!;
 
-    public IReadOnlyDictionary<XName, XElement> Properties { get; }
+    public IReadOnlyDictionary<XName, PropResponse> Properties { get; }
 
     public Ical.Net.Calendar? ICalCalendar { get; }
 
@@ -55,7 +59,7 @@ public class Event : IEntity
 
     public Task<bool> UpdateAsync(Client client, CancellationToken cancellationToken = default)
     {
-        if (Etag == null || CalendarData == null)
+        if (Etag is null || CalendarData is null)
             throw new InvalidOperationException("Event data was not loaded.");
 
         return client.UpdateEventAsync(Href, Etag, Serialize(), cancellationToken);
@@ -63,7 +67,7 @@ public class Event : IEntity
 
     public Task<bool> DeleteAsync(Client client, CancellationToken cancellationToken = default)
     {
-        if (Etag == null)
+        if (Etag is null)
             throw new InvalidOperationException("Etag was not loaded.");
 
         return client.DeleteEventAsync(Href, Etag, cancellationToken);

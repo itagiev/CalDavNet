@@ -32,7 +32,7 @@ class Program
         var calDavClient = scope.ServiceProvider.GetRequiredKeyedService<CalDavClient>("yandex");
         var client = new Client(calDavClient, Username, Password);
 
-        //await Process(client);
+        await Process(client);
 
         #region Filter Test
 
@@ -129,10 +129,10 @@ class Program
         //Console.WriteLine("Processing mailbox logic\n");
         //await ProcessMailboxLogic(client, principal.CalendarHomeSet);
 
-        //Console.WriteLine();
-        //Console.WriteLine("-----------------------------------------");
-        //Console.WriteLine("Processing calendar logic\n");
-        //await ProcessCalendarLogic(client, defaultCalendar);
+        Console.WriteLine();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("Processing calendar logic\n");
+        await ProcessCalendarLogic(client, defaultCalendar);
 
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
@@ -176,11 +176,11 @@ class Program
 
                 foreach (var @event in events)
                 {
-                    if (@event.ICalCalendar != null)
+                    if (@event.ICalCalendar is not null)
                     {
                         Console.Write($"Events count: {@event.ICalCalendar.Events.Count}");
 
-                        if (@event.ICalEvent != null)
+                        if (@event.ICalEvent is not null)
                         {
                             Console.Write($" Summary: {@event.ICalEvent.Summary}");
                         }

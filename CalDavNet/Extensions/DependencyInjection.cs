@@ -11,7 +11,7 @@ public static class DependencyInjection
         var options = new CalDavOptions();
         configure(options);
 
-        services.AddHttpClient(clientName,
+        var httpClientBuilder = services.AddHttpClient(clientName,
             client =>
             {
                 ArgumentNullException.ThrowIfNull(options.BaseAddress);
@@ -25,6 +25,12 @@ public static class DependencyInjection
 
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             });
+
+        if (options.EnableLoggingHandler)
+        {
+            httpClientBuilder.AddHttpMessageHandler<LoggingHandler>();
+            services.AddTransient<LoggingHandler>();
+        }
 
         services.AddKeyedSingleton(clientName, (serviceProvider, _) =>
         {

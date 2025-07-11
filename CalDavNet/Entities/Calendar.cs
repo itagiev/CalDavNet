@@ -22,9 +22,11 @@ public class Calendar : IEntity
     {
         get
         {
-            if (_displayName is null && Properties.TryGetValue(XNames.DisplayName, out var element))
+            if (_displayName is null
+                && Properties.TryGetValue(XNames.DisplayName, out var prop)
+                && prop.IsSuccessful)
             {
-                _displayName = element.Value;
+                _displayName = prop.Prop.Value;
             }
 
             return _displayName;
@@ -35,9 +37,11 @@ public class Calendar : IEntity
     {
         get
         {
-            if (_description is null && Properties.TryGetValue(XNames.CalendarDescription, out var element))
+            if (_description is null
+                && Properties.TryGetValue(XNames.CalendarDescription, out var prop)
+                && prop.IsSuccessful)
             {
-                _description = element.Value;
+                _description = prop.Prop.Value;
             }
 
             return _description;
@@ -48,9 +52,11 @@ public class Calendar : IEntity
     {
         get
         {
-            if (_color is null && Properties.TryGetValue(XNames.CalendarColor, out var element))
+            if (_color is null
+                && Properties.TryGetValue(XNames.CalendarColor, out var prop)
+                && prop.IsSuccessful)
             {
-                _color = element.Value;
+                _color = prop.Prop.Value;
             }
 
             return _color;
@@ -61,9 +67,11 @@ public class Calendar : IEntity
     {
         get
         {
-            if (_ctag is null && Properties.TryGetValue(XNames.GetCtag, out var element))
+            if (_ctag is null
+                && Properties.TryGetValue(XNames.GetCtag, out var prop)
+                && prop.IsSuccessful)
             {
-                _ctag = element.Value;
+                _ctag = prop.Prop.Value;
             }
 
             return _ctag;
@@ -74,9 +82,11 @@ public class Calendar : IEntity
     {
         get
         {
-            if (_syncToken is null && Properties.TryGetValue(XNames.SyncToken, out var element))
+            if (_syncToken is
+                null && Properties.TryGetValue(XNames.SyncToken, out var prop)
+                && prop.IsSuccessful)
             {
-                _syncToken = element.Value;
+                _syncToken = prop.Prop.Value;
             }
 
             return _syncToken;
@@ -87,9 +97,11 @@ public class Calendar : IEntity
     {
         get
         {
-            if (Properties.TryGetValue(XNames.SupportedCalendarComponentSet, out var element))
+            if (_supportedCalendarComponentSet == CalendarComponent.None
+                && Properties.TryGetValue(XNames.SupportedCalendarComponentSet, out var prop)
+                && prop.IsSuccessful)
             {
-                foreach (var comp in element.Elements(XNames.Comp))
+                foreach (var comp in prop.Prop.Elements(XNames.Comp))
                 {
                     if (comp.Attribute("name") is XAttribute attr)
                     {
@@ -123,7 +135,7 @@ public class Calendar : IEntity
 
     public string Href { get; } = null!;
 
-    public IReadOnlyDictionary<XName, XElement> Properties { get; }
+    public IReadOnlyDictionary<XName, PropResponse> Properties { get; }
 
     public Calendar(MultistatusEntry entry)
     {

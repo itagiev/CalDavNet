@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 
@@ -5,42 +6,16 @@ namespace CalDavNet;
 
 public class MultistatusResponse : Response
 {
-    public IReadOnlyList<MultistatusEntry> Entries { get; private set; } = null!;
+    readonly List<MultistatusEntry> _entries = null!;
+
+    public IReadOnlyList<MultistatusEntry> Entries => _entries;
 
     public MultistatusResponse(int statusCode, string content)
         : base(statusCode)
     {
-        if (IsSuccess && TryParseDocument(content, out var element) && element is not null)
-        {
-            Entries = element.Elements()
-                .Select(ParseEntry)
-                .ToList()
-                .AsReadOnly();
-        }
-        else
-        {
-            Entries = [];
-        }
-    }
-
-    private static MultistatusEntry ParseEntry(XElement response)
-    {
-        return new MultistatusEntry
-        {
-            Href = response.Element(XNames.Href)!.Value,
-            Properties = response.Elements()
-                .Where(x => x.Name == XNames.Propstat)
-                .Where(x =>
-                {
-                    int statusCode = x.GetStatusCode();
-                    return statusCode >= 200 && statusCode <= 299;
-                })
-                .SelectMany(x => x.Elements()
-                    .Where(x => x.Name == XNames.Prop)
-                    .Elements())
-                .ToDictionary(x => x.Name, x => x)
-                .AsReadOnly()
-        };
+        _entries = (IsSuccessStatusCode && TryParseDocument(content, out var element))
+            ? [.. element.Elements().Select(ParseResponse)]
+            : [];
     }
 
     private static bool TryParseDocument(string text, [NotNullWhen(true)] out XElement? element)
@@ -55,5 +30,27 @@ public class MultistatusResponse : Response
             element = null;
             return false;
         }
+    }
+
+    private static MultistatusEntry ParseResponse(XElement response)
+    {
+        Dictionary<XName, PropResponse> properties = [];
+
+        foreach (var propstat in response.Elements(XNames.Propstat))
+        {
+            int statusCode = propstat.GetStatusCodeOrDefault();
+
+            foreach (var prop in propstat.Elements(XNames.Prop))
+            {
+                foreach (var p in prop.Elements())
+                {
+                    properties.Add(p.Name, new PropResponse(p, statusCode));
+                }
+            }
+        }
+
+        return new MultistatusEntry(response.Element(XNames.Href)!.Value,
+            properties,
+            response.GetStatusCodeOrDefault(200));
     }
 }

@@ -7,13 +7,13 @@ public static class XElementExtensions
 {
     private static readonly Regex StatusCodeRegex = new Regex(@"\b(\d{3})\b", RegexOptions.Compiled);
 
-    public static int GetStatusCode(this XElement element)
+    public static int GetStatusCodeOrDefault(this XElement element, int @default = -1)
     {
-        string? status = element.Element(XName.Get(Constants.Dav.Status, Constants.Dav.Namespace))?.Value;
+        string? status = element.Element(XNames.Status)?.Value;
 
         if (string.IsNullOrEmpty(status))
         {
-            return -1;
+            return @default;
         }
 
         Match match = StatusCodeRegex.Match(status);
@@ -23,6 +23,6 @@ public static class XElementExtensions
             return code;
         }
 
-        return -1;
+        return @default;
     }
 }

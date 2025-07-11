@@ -13,9 +13,11 @@ public class Principal : IEntity
     {
         get
         {
-            if (_displayName is null && Properties.TryGetValue(XNames.DisplayName, out var element))
+            if (_displayName is null
+                && Properties.TryGetValue(XNames.DisplayName, out var prop)
+                && prop.IsSuccessful)
             {
-                _displayName = element.Value;
+                _displayName = prop.Prop.Value;
             }
 
             return _displayName;
@@ -26,20 +28,22 @@ public class Principal : IEntity
     {
         get
         {
-            if (_calendarHomeSet is null && Properties.TryGetValue(XNames.CalendarHomeSet, out var element))
+            if (_calendarHomeSet is null
+                && Properties.TryGetValue(XNames.CalendarHomeSet, out var prop)
+                && prop.IsSuccessful)
             {
-                _calendarHomeSet = element.Value;
+                _calendarHomeSet = prop.Prop.Value;
             }
 
             return _calendarHomeSet;
         }
     }
 
+    public IReadOnlyDictionary<XName, PropResponse> Properties { get; }
+
     public Principal(MultistatusEntry entry)
     {
         Href = entry.Href;
         Properties = entry.Properties;
     }
-
-    public IReadOnlyDictionary<XName, XElement> Properties { get; }
 }
