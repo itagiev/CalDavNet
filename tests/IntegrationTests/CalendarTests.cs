@@ -57,7 +57,7 @@ public class CalendarTests : IAsyncLifetime
     public async Task ShouldFindCalendars()
     {
         // Act
-        var calendars = await _client.GetCalendarsAsync(_calendarHomeSet, BuildBodyHelper.BuildPropfindBody(
+        var calendars = await _client.GetCalendarsAsync(_calendarHomeSet, BodyHelper.BuildPropfind(
             [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet, XNames.DisplayName]));
 
         // Assert

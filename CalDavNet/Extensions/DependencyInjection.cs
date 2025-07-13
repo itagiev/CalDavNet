@@ -16,13 +16,6 @@ public static class DependencyInjection
             {
                 ArgumentNullException.ThrowIfNull(options.BaseAddress);
                 client.BaseAddress = options.BaseAddress;
-
-                if (!string.IsNullOrEmpty(options.Depth))
-                    client.DefaultRequestHeaders.Add("Depth", options.Depth);
-
-                if (!string.IsNullOrEmpty(options.Prefer))
-                    client.DefaultRequestHeaders.Add("Prefer", options.Prefer);
-
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             });
 

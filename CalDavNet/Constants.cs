@@ -9,25 +9,27 @@ public static class Constants
         public const string Namespace = "DAV:";
         public const string Prefix = "d";
 
-        public const string Propfind = "propfind";
-        public const string PropertyUpdate = "propertyupdate";
-        public const string Multistatus = "multistatus";
-        public const string Response = "response";
-        public const string Href = "href";
-        public const string Status = "status";
-        public const string Propstat = "propstat";
-        public const string Prop = "prop";
-        public const string Set = "set";
-        public const string ResourceType = "resourcetype";
-        public const string GetContentType = "getcontenttype";
+        public const string AllProp = "allprop";
         public const string Collection = "collection";
+        public const string CreationDate = "creationdate";
         public const string CurrentUserPrincipal = "current-user-principal";
         public const string DisplayName = "displayname";
-        public const string CreationDate = "creationdate";
-        public const string GetLastModified = "getlastmodified";
+        public const string GetContentType = "getcontenttype";
         public const string GetEtag = "getetag";
+        public const string GetLastModified = "getlastmodified";
+        public const string Href = "href";
+        public const string Multistatus = "multistatus";
+        public const string Prop = "prop";
+        public const string Propfind = "propfind";
+        public const string PropertyUpdate = "propertyupdate";
+        public const string Propstat = "propstat";
+        public const string ResourceType = "resourcetype";
+        public const string Response = "response";
+        public const string Set = "set";
+        public const string Status = "status";
+        public const string SyncCollection = "sync-collection";
+        public const string SyncLevel = "sync-level";
         public const string SyncToken = "sync-token";
-        public const string AllProp = "allprop";
     }
 
     public static class Server
@@ -133,43 +135,47 @@ public static class XNames
 {
     #region Dav
 
-    public static XName Propfind => XName.Get(Constants.Dav.Propfind, Constants.Dav.Namespace);
-
-    public static XName PropertyUpdate => XName.Get(Constants.Dav.PropertyUpdate, Constants.Dav.Namespace);
-
-    public static XName Multistatus => XName.Get(Constants.Dav.Multistatus, Constants.Dav.Namespace);
-
-    public static XName Response => XName.Get(Constants.Dav.Response, Constants.Dav.Namespace);
-
-    public static XName Href => XName.Get(Constants.Dav.Href, Constants.Dav.Namespace);
-
-    public static XName Status => XName.Get(Constants.Dav.Status, Constants.Dav.Namespace);
-
-    public static XName Propstat => XName.Get(Constants.Dav.Propstat, Constants.Dav.Namespace);
-
-    public static XName Prop => XName.Get(Constants.Dav.Prop, Constants.Dav.Namespace);
-
-    public static XName Set => XName.Get(Constants.Dav.Set, Constants.Dav.Namespace);
-
-    public static XName ResourceType => XName.Get(Constants.Dav.ResourceType, Constants.Dav.Namespace);
-
-    public static XName GetContentType => XName.Get(Constants.Dav.GetContentType, Constants.Dav.Namespace);
+    public static XName AllProp => XName.Get(Constants.Dav.AllProp, Constants.Dav.Namespace);
 
     public static XName Collection => XName.Get(Constants.Dav.Collection, Constants.Dav.Namespace);
+
+    public static XName CreationDate => XName.Get(Constants.Dav.CreationDate, Constants.Dav.Namespace);
 
     public static XName CurrentUserPrincipal => XName.Get(Constants.Dav.CurrentUserPrincipal, Constants.Dav.Namespace);
 
     public static XName DisplayName => XName.Get(Constants.Dav.DisplayName, Constants.Dav.Namespace);
 
-    public static XName CreationDate => XName.Get(Constants.Dav.CreationDate, Constants.Dav.Namespace);
-
-    public static XName GetLastModified => XName.Get(Constants.Dav.GetLastModified, Constants.Dav.Namespace);
+    public static XName GetContentType => XName.Get(Constants.Dav.GetContentType, Constants.Dav.Namespace);
 
     public static XName GetEtag => XName.Get(Constants.Dav.GetEtag, Constants.Dav.Namespace);
 
-    public static XName SyncToken => XName.Get(Constants.Dav.SyncToken, Constants.Dav.Namespace);
+    public static XName GetLastModified => XName.Get(Constants.Dav.GetLastModified, Constants.Dav.Namespace);
 
-    public static XName AllProp => XName.Get(Constants.Dav.AllProp, Constants.Dav.Namespace);
+    public static XName Href => XName.Get(Constants.Dav.Href, Constants.Dav.Namespace);
+
+    public static XName Multistatus => XName.Get(Constants.Dav.Multistatus, Constants.Dav.Namespace);
+
+    public static XName Prop => XName.Get(Constants.Dav.Prop, Constants.Dav.Namespace);
+
+    public static XName Propfind => XName.Get(Constants.Dav.Propfind, Constants.Dav.Namespace);
+
+    public static XName PropertyUpdate => XName.Get(Constants.Dav.PropertyUpdate, Constants.Dav.Namespace);
+
+    public static XName Propstat => XName.Get(Constants.Dav.Propstat, Constants.Dav.Namespace);
+
+    public static XName ResourceType => XName.Get(Constants.Dav.ResourceType, Constants.Dav.Namespace);
+
+    public static XName Response => XName.Get(Constants.Dav.Response, Constants.Dav.Namespace);
+
+    public static XName Set => XName.Get(Constants.Dav.Set, Constants.Dav.Namespace);
+
+    public static XName Status => XName.Get(Constants.Dav.Status, Constants.Dav.Namespace);
+
+    public static XName SyncCollection => XName.Get(Constants.Dav.SyncCollection, Constants.Dav.Namespace);
+
+    public static XName SyncLevel => XName.Get(Constants.Dav.SyncLevel, Constants.Dav.Namespace);
+
+    public static XName SyncToken => XName.Get(Constants.Dav.SyncToken, Constants.Dav.Namespace);
 
     #endregion
 

@@ -22,9 +22,10 @@ public class Client
     {
         var request = new HttpRequestMessage(CalDavClient.Propfind, "")
         {
-            Content = BuildBodyHelper.BuildCurrentUserPrincipalPropfindBody().ToStringContent()
+            Content = BodyHelper.BuildCurrentUserPrincipalPropfind().ToStringContent()
         }
         .WithDepth(0)
+        .WithPrefer("return-minimal")
         .WithBasicAuthorization(_token);
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
@@ -42,10 +43,11 @@ public class Client
     /// <param name="upn">User principal name.</param>
     public async Task<Principal?> GetPrincipalAsync(string upn, CancellationToken cancellationToken = default)
     {
-        var body = BuildBodyHelper.BuildAllPropPropfindBody();
+        var body = BodyHelper.BuildAllPropPropfind();
 
         var request = new HttpRequestMessage(CalDavClient.Propfind, upn)
             .WithDepth(0)
+            .WithPrefer("return-minimal")
             .WithBasicAuthorization(_token);
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
@@ -69,6 +71,8 @@ public class Client
         {
             Content = body.ToStringContent()
         }
+        .WithDepth(1)
+        .WithPrefer("return-minimal")
         .WithBasicAuthorization(_token);
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
@@ -93,6 +97,7 @@ public class Client
             Content = body.ToStringContent()
         }
         .WithDepth(0)
+        .WithPrefer("return-minimal")
         .WithBasicAuthorization(_token);
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
@@ -138,6 +143,7 @@ public class Client
             Content = body.ToStringContent()
         }
         .WithDepth(0)
+        .WithPrefer("return-minimal")
         .WithBasicAuthorization(_token);
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
@@ -149,7 +155,7 @@ public class Client
     }
 
     /// <summary>
-    /// Gets a single event by multiget body <see cref="BuildBodyHelper.BuildCalendarMultigetBody(string[])"/>.
+    /// Gets a single event by multiget body <see cref="BodyHelper.BuildCalendarMultiget(string[])"/>.
     /// Request body should contain only one href (of requested event), method returns only first event even if more requested.
     /// </summary>
     /// <param name="href">Calendar href.</param>
@@ -162,6 +168,7 @@ public class Client
             Content = body.ToStringContent()
         }
         .WithDepth(0)
+        .WithPrefer("return-minimal")
         .WithBasicAuthorization(_token);
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
@@ -178,7 +185,7 @@ public class Client
     /// <param name="eventHref">Event href.</param>
     public Task<Event?> GetEventAsync(string calendarHref, string eventHref,
         CancellationToken cancellationToken = default)
-        => GetEventAsync(calendarHref, BuildBodyHelper.BuildCalendarMultigetBody(eventHref));
+        => GetEventAsync(calendarHref, BodyHelper.BuildCalendarMultiget(eventHref));
 
     /// <summary>
     /// Creates calendar event.
@@ -230,9 +237,32 @@ public class Client
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, href)
             .WithEtag(etagOrCtag)
+            .WithPrefer("return-minimal")
             .WithBasicAuthorization(_token);
 
         var response = await _client.SendAsync(request, cancellationToken);
         return response.IsSuccessStatusCode;
+    }
+
+    /// <summary>
+    /// Requests for item change collection for a folder with a given href.
+    /// </summary>
+    /// <param name="href">Folder href (e.g. /calendars/john@mail.com/events-27560559/)</param>
+    /// <returns></returns>
+    public async Task<(List<SyncItem> ItemChanges, string SyncToken)> SyncFolderItemsAsync(string href, string syncToken,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(CalDavClient.Report, href)
+        {
+            Content = BodyHelper.BuildSyncCollection(syncToken).ToStringContent()
+        }
+        .WithDepth(1)
+        .WithPrefer("return-minimal")
+        .WithBasicAuthorization(_token);
+
+        var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
+
+        return (response.Entries.Select(x => new SyncItem(x))
+            .ToList(), response.SyncToken!);
     }
 }

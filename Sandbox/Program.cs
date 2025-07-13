@@ -24,7 +24,7 @@ class Program
         services.AddCalDav("yandex", options =>
         {
             options.BaseAddress = new Uri("https://caldav.yandex.ru");
-            options.EnableLoggingHandler = true;
+            options.EnableLoggingHandler = false;
         });
 
         var provider = services.BuildServiceProvider();
@@ -70,7 +70,7 @@ class Program
 
         // TEST: Getting calendars
         var calendars = await client.GetCalendarsAsync(principal.CalendarHomeSet,
-            BuildBodyHelper.BuildPropfindBody([],
+            BodyHelper.BuildPropfind([],
                 [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet, XNames.DisplayName]));
 
         Console.WriteLine();
@@ -102,7 +102,7 @@ class Program
             Console.WriteLine($"Loading single calendar {defaultCalendar.Href}");
 
             defaultCalendar = await client.GetCalendarAsync(calendars.FirstOrDefault()!.Href,
-                BuildBodyHelper.BuildPropfindBody([XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.DisplayName]));
+                BodyHelper.BuildPropfind([XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.DisplayName]));
 
             /*
              * Or
@@ -125,6 +125,17 @@ class Program
             throw;
         }
 
+        // TEST: Sync
+        string syncToken = "sync-token:1 1752408088000";
+        var syncResult = await defaultCalendar.SyncItemsAsync(client, syncToken);
+
+        Console.WriteLine($"Sync Result new sync token: {syncResult.SyncToken}");
+
+        foreach (var e in syncResult.ItemChanges)
+        {
+            Console.WriteLine($"{e.Href} - {e.Etag}");
+        }
+
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
         //Console.WriteLine("Processing mailbox logic\n");
@@ -135,20 +146,20 @@ class Program
         //Console.WriteLine("Processing calendar logic\n");
         //await ProcessCalendarLogic(client, defaultCalendar);
 
-        Console.WriteLine();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("Processing event logic\n");
-        await ProcessEventLogic(client, defaultCalendar);
+        //Console.WriteLine();
+        //Console.WriteLine("-----------------------------------------");
+        //Console.WriteLine("Processing event logic\n");
+        //await ProcessEventLogic(client, defaultCalendar);
     }
 
     static async Task ProcessMailboxLogic(Client client, string calendarHomeSet)
     {
         string calendarName = "Haha calendar";
-        var body = BuildBodyHelper.BuildMkcalendarBody(calendarName, Constants.Comp.VEVENT);
+        var body = BodyHelper.BuildMkcalendar(calendarName, Constants.Comp.VEVENT);
         var result = await client.CreateCalendarAsync(calendarHomeSet, body);
         Console.WriteLine(result);
 
-        var calendars = await client.GetCalendarsAsync(calendarHomeSet, BuildBodyHelper.BuildPropfindBody(
+        var calendars = await client.GetCalendarsAsync(calendarHomeSet, BodyHelper.BuildPropfind(
             [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet, XNames.DisplayName]));
 
         Calendar myCalendar = null!;
@@ -177,7 +188,7 @@ class Program
                 .AddTimeRange(DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow.AddMonths(1))
                 .ToXElement);
 
-        var events = await calendar.GetEventsAsync(client, BuildBodyHelper.BuildCalendarQueryBody(filter.ToXElement));
+        var events = await calendar.GetEventsAsync(client, BodyHelper.BuildCalendarQuery(filter.ToXElement));
 
         if (events.Count > 0)
         {
@@ -190,7 +201,7 @@ class Program
 
             Console.WriteLine();
 
-            events = await calendar.GetEventsAsync(client, BuildBodyHelper.BuildCalendarMultigetBody(events.Select(x => x.Href)));
+            events = await calendar.GetEventsAsync(client, BodyHelper.BuildCalendarMultiget(events.Select(x => x.Href)));
 
             if (events.Count > 0)
             {
