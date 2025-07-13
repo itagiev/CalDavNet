@@ -21,12 +21,13 @@ public class Client
     public async Task<string?> GetPrincipalNameAsync(CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Propfind, "")
-            .WithDepth(0)
-            .WithBasicAuthorization(_token);
+        {
+            Content = BuildBodyHelper.BuildCurrentUserPrincipalPropfindBody().ToStringContent()
+        }
+        .WithDepth(0)
+        .WithBasicAuthorization(_token);
 
-        request.Content = BuildBodyHelper.BuildCurrentUserPrincipalPropfindBody().ToStringContent();
-
-        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries.FirstOrDefault() is MultistatusEntry entry
             && entry.Properties.TryGetValue(XNames.CurrentUserPrincipal, out var prop) && prop.IsSuccessful
@@ -47,7 +48,7 @@ public class Client
             .WithDepth(0)
             .WithBasicAuthorization(_token);
 
-        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessful
             ? new Principal(entry)
@@ -65,11 +66,12 @@ public class Client
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Propfind, href)
-            .WithBasicAuthorization(_token);
+        {
+            Content = body.ToStringContent()
+        }
+        .WithBasicAuthorization(_token);
 
-        request.Content = body.ToStringContent();
-
-        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries
             .Where(e => e.IsCalendar && e.IsSuccessful)
@@ -87,12 +89,13 @@ public class Client
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Propfind, href)
-            .WithDepth(0)
-            .WithBasicAuthorization(_token);
+        {
+            Content = body.ToStringContent()
+        }
+        .WithDepth(0)
+        .WithBasicAuthorization(_token);
 
-        request.Content = body.ToStringContent();
-
-        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         // Only if success, result not empty and has d:resource-type with d:calendar child
         if (response.Entries.FirstOrDefault() is MultistatusEntry entry &&
@@ -115,7 +118,7 @@ public class Client
         {
             Content = body.ToStringContent()
         }
-        .WithDepth(0)
+        .WithPrefer("return=representation")
         .WithBasicAuthorization(_token);
 
         var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -131,12 +134,13 @@ public class Client
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Report, href)
-            .WithDepth(0)
-            .WithBasicAuthorization(_token);
+        {
+            Content = body.ToStringContent()
+        }
+        .WithDepth(0)
+        .WithBasicAuthorization(_token);
 
-        request.Content = body.ToStringContent();
-
-        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries
             .Where(e => e.IsSuccessful)
@@ -154,12 +158,13 @@ public class Client
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Report, href)
-            .WithDepth(0)
-            .WithBasicAuthorization(_token);
+        {
+            Content = body.ToStringContent()
+        }
+        .WithDepth(0)
+        .WithBasicAuthorization(_token);
 
-        request.Content = body.ToStringContent();
-
-        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessful
             ? new Event(entry)
@@ -184,11 +189,13 @@ public class Client
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Put, href)
-            .WithBasicAuthorization(_token);
+        {
+            Content = new StringContent(body, Encoding.UTF8, "text/calendar")
+        }
+        .WithPrefer("return=representation")
+        .WithBasicAuthorization(_token);
 
-        request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
-
-        var response = await _client.SendAsync2(request, cancellationToken);
+        var response = await _client.SendAsync(request, cancellationToken);
         return response.IsSuccessStatusCode;
     }
 
@@ -202,28 +209,30 @@ public class Client
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Put, href)
-            .WithEtag(etag)
-            .WithBasicAuthorization(_token);
+        {
+            Content = new StringContent(body, Encoding.UTF8, "text/calendar")
+        }
+        .WithEtag(etag)
+        .WithPrefer("return=representation")
+        .WithBasicAuthorization(_token);
 
-        request.Content = new StringContent(body, Encoding.UTF8, "text/calendar");
-
-        var response = await _client.SendAsync2(request, cancellationToken);
+        var response = await _client.SendAsync(request, cancellationToken);
         return response.IsSuccessStatusCode;
     }
 
     /// <summary>
-    /// Deletes calendar event.
+    /// Deletes resource on caldav server (e.g. calendar or event).
     /// </summary>
-    /// <param name="href">Event href (e.g. /calendars/john@mail.com/events-27560559/oeibm394kvocows3lgjn.ics).</param>
-    /// <param name="etag">Event "version".</param>
-    public async Task<bool> DeleteEventAsync(string href, string etag,
+    /// <param name="href">Resource href (e.g. /calendars/john@mail.com/events-27560559/oeibm394kvocows3lgjn.ics).</param>
+    /// <param name="etagOrCtag">Resource version "version".</param>
+    public async Task<bool> DeleteAsync(string href, string etagOrCtag,
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, href)
-            .WithEtag(etag)
+            .WithEtag(etagOrCtag)
             .WithBasicAuthorization(_token);
 
-        var response = await _client.SendAsync2(request, cancellationToken);
+        var response = await _client.SendAsync(request, cancellationToken);
         return response.IsSuccessStatusCode;
     }
 }

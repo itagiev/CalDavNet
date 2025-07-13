@@ -174,4 +174,12 @@ public class Calendar : IEntity
     {
         return client.GetEventAsync(Href, eventHref, cancellationToken);
     }
+
+    public Task<bool> DeleteAsync(Client client, CancellationToken cancellationToken = default)
+    {
+        if (Ctag is null)
+            throw new InvalidOperationException("Ctag was not loaded.");
+
+        return client.DeleteAsync(Href, Ctag, cancellationToken);
+    }
 }

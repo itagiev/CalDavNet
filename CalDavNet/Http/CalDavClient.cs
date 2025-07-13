@@ -3,6 +3,7 @@ namespace CalDavNet;
 public class CalDavClient
 {
     public static readonly HttpMethod Propfind = new HttpMethod("PROPFIND");
+    public static readonly HttpMethod Proppatch = new HttpMethod("PROPPATCH");
     public static readonly HttpMethod Report = new HttpMethod("REPORT");
     public static readonly HttpMethod Mkcalendar = new HttpMethod("MKCALENDAR");
 
@@ -15,7 +16,8 @@ public class CalDavClient
         _clientName = clientName;
     }
 
-    public async Task<MultistatusResponse> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    public async Task<MultistatusResponse> SendForMultiResponseAsync(HttpRequestMessage request,
+        CancellationToken cancellationToken = default)
     {
         var httpClient = _clientFactory.CreateClient(_clientName);
         var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -23,8 +25,7 @@ public class CalDavClient
         return new MultistatusResponse((int)response.StatusCode, content);
     }
 
-    // TODO: SendAsync<T>
-    public async Task<Response> SendAsync2(HttpRequestMessage request, CancellationToken cancellationToken = default)
+    public async Task<Response> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
         var httpClient = _clientFactory.CreateClient(_clientName);
         var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);

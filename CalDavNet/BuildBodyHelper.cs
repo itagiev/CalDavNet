@@ -126,4 +126,24 @@ public static class BuildBodyHelper
 
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), mkcalendar);
     }
+
+    public static XDocument BuildPropertyUpdateBody(string displayName, string? description = null,
+        string? color = null)
+    {
+        var prop = new XElement(XNames.Prop,
+            new XElement(XNames.DisplayName, displayName));
+
+        if (!string.IsNullOrEmpty(description))
+            prop.Add(new XElement(XNames.CalendarDescription, description));
+
+        if (!string.IsNullOrEmpty(color))
+            prop.Add(new XElement(XNames.CalendarColor, color));
+
+        var propertyUpdate = new XElement(XNames.PropertyUpdate,
+            new XAttribute(XNamespace.Xmlns + Constants.Dav.Prefix, Constants.Dav.Namespace),
+            new XAttribute(XNamespace.Xmlns + Constants.Cal.Prefix, Constants.Cal.Namespace),
+            new XElement(XNames.Set, prop));
+
+        return new XDocument(new XDeclaration("1.0", "UTF-8", null), propertyUpdate);
+    }
 }

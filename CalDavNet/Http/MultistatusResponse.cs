@@ -1,6 +1,7 @@
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
+
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CalDavNet;
 
@@ -13,23 +14,9 @@ public class MultistatusResponse : Response
     public MultistatusResponse(int statusCode, string content)
         : base(statusCode)
     {
-        _entries = (IsSuccessStatusCode && TryParseDocument(content, out var element))
-            ? [.. element.Elements().Select(ParseResponse)]
-            : [];
-    }
-
-    private static bool TryParseDocument(string text, [NotNullWhen(true)] out XElement? element)
-    {
-        try
-        {
-            element = XElement.Parse(text);
-            return true;
-        }
-        catch
-        {
-            element = null;
-            return false;
-        }
+        _entries = XElement.Parse(content).Elements()
+            .Select(ParseResponse)
+            .ToList();
     }
 
     private static MultistatusEntry ParseResponse(XElement response)

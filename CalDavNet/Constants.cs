@@ -10,6 +10,7 @@ public static class Constants
         public const string Prefix = "d";
 
         public const string Propfind = "propfind";
+        public const string PropertyUpdate = "propertyupdate";
         public const string Multistatus = "multistatus";
         public const string Response = "response";
         public const string Href = "href";
@@ -133,6 +134,8 @@ public static class XNames
     #region Dav
 
     public static XName Propfind => XName.Get(Constants.Dav.Propfind, Constants.Dav.Namespace);
+
+    public static XName PropertyUpdate => XName.Get(Constants.Dav.PropertyUpdate, Constants.Dav.Namespace);
 
     public static XName Multistatus => XName.Get(Constants.Dav.Multistatus, Constants.Dav.Namespace);
 

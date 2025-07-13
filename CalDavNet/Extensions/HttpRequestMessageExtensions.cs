@@ -10,6 +10,12 @@ public static class HttpRequestMessageExtensions
         return request;
     }
 
+    public static HttpRequestMessage WithPrefer(this HttpRequestMessage request, string prefer)
+    {
+        request.Headers.Add("Prefer", prefer);
+        return request;
+    }
+
     public static HttpRequestMessage WithDepth(this HttpRequestMessage request, int depth)
     {
         request.Headers.Add("Depth", depth.ToString());

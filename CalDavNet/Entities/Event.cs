@@ -70,7 +70,7 @@ public class Event : IEntity
         if (Etag is null)
             throw new InvalidOperationException("Etag was not loaded.");
 
-        return client.DeleteEventAsync(Href, Etag, cancellationToken);
+        return client.DeleteAsync(Href, Etag, cancellationToken);
     }
 
     public string Serialize()

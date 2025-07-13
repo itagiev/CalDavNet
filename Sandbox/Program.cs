@@ -24,6 +24,7 @@ class Program
         services.AddCalDav("yandex", options =>
         {
             options.BaseAddress = new Uri("https://caldav.yandex.ru");
+            options.EnableLoggingHandler = true;
         });
 
         var provider = services.BuildServiceProvider();
@@ -129,21 +130,42 @@ class Program
         //Console.WriteLine("Processing mailbox logic\n");
         //await ProcessMailboxLogic(client, principal.CalendarHomeSet);
 
-        Console.WriteLine();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("Processing calendar logic\n");
-        await ProcessCalendarLogic(client, defaultCalendar);
-
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
-        //Console.WriteLine("Processing event logic\n");
-        //await ProcessEventLogic(client, defaultCalendar);
+        //Console.WriteLine("Processing calendar logic\n");
+        //await ProcessCalendarLogic(client, defaultCalendar);
+
+        Console.WriteLine();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("Processing event logic\n");
+        await ProcessEventLogic(client, defaultCalendar);
     }
 
     static async Task ProcessMailboxLogic(Client client, string calendarHomeSet)
     {
-        var body = BuildBodyHelper.BuildMkcalendarBody("Новый календарь", Constants.Comp.VEVENT);
+        string calendarName = "Haha calendar";
+        var body = BuildBodyHelper.BuildMkcalendarBody(calendarName, Constants.Comp.VEVENT);
         var result = await client.CreateCalendarAsync(calendarHomeSet, body);
+        Console.WriteLine(result);
+
+        var calendars = await client.GetCalendarsAsync(calendarHomeSet, BuildBodyHelper.BuildPropfindBody(
+            [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet, XNames.DisplayName]));
+
+        Calendar myCalendar = null!;
+
+        foreach (var calendar in calendars)
+        {
+            if (string.Equals(calendar.DisplayName, calendarName, StringComparison.OrdinalIgnoreCase))
+            {
+                myCalendar = calendar;
+                break;
+            }
+        }
+
+        Console.WriteLine(result);
+
+        result = await myCalendar.DeleteAsync(client);
+
         Console.WriteLine(result);
     }
 
