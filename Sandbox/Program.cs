@@ -127,9 +127,16 @@ class Program
 
         // TEST: Sync
         string syncToken = "sync-token:1 1752408088000";
+        syncToken = "sync-token:1 1752587558000";
+        syncToken = "sync-token:1 1752673657772";
+        //syncToken = "sync-token:1 1752674600626";
+        string ctag = "1752587558000";
+        ctag = "1752673657772";
+        ctag = "1752674600626";
         var syncResult = await defaultCalendar.SyncItemsAsync(client, syncToken);
 
-        Console.WriteLine($"Sync Result new sync token: {syncResult.SyncToken}");
+        Console.WriteLine($"Sync Result new sync token: {syncResult.SyncToken}, new ctag: {defaultCalendar.Ctag}");
+        Console.WriteLine($"{defaultCalendar.Ctag == ctag}, {defaultCalendar.SyncToken == syncToken}");
 
         foreach (var e in syncResult.ItemChanges)
         {

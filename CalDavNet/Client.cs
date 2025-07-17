@@ -249,7 +249,7 @@ public class Client
     /// </summary>
     /// <param name="href">Folder href (e.g. /calendars/john@mail.com/events-27560559/)</param>
     /// <returns></returns>
-    public async Task<(List<SyncItem> ItemChanges, string SyncToken)> SyncFolderItemsAsync(string href, string syncToken,
+    public async Task<(List<EntityChange> ItemChanges, string SyncToken)> SyncFolderItemsAsync(string href, string syncToken,
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Report, href)
@@ -262,7 +262,7 @@ public class Client
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
-        return (response.Entries.Select(x => new SyncItem(x))
+        return (response.Entries.Select(x => new EntityChange(x))
             .ToList(), response.SyncToken!);
     }
 }
