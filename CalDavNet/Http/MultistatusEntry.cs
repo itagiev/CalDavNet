@@ -19,9 +19,9 @@ public class MultistatusEntry
 
     public IReadOnlyDictionary<XName, PropResponse> Properties => _properties;
 
-    public bool IsSuccessful => StatusCode >= 200 && StatusCode <= 299;
+    public bool IsSuccessStatusCode => StatusCode >= 200 && StatusCode <= 299;
 
     public bool IsCalendar => Properties.TryGetValue(XNames.ResourceType, out var prop)
-        && prop.IsSuccessful
+        && prop.IsSuccessStatusCode
         && prop.Prop.Element(XNames.Calendar) is not null;
 }

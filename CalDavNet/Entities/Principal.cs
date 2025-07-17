@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public class Principal : IEntity
+public class Principal
 {
     private string? _displayName;
     private string? _calendarHomeSet;
@@ -15,7 +15,7 @@ public class Principal : IEntity
         {
             if (_displayName is null
                 && Properties.TryGetValue(XNames.DisplayName, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _displayName = prop.Prop.Value;
             }
@@ -30,7 +30,7 @@ public class Principal : IEntity
         {
             if (_calendarHomeSet is null
                 && Properties.TryGetValue(XNames.CalendarHomeSet, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _calendarHomeSet = prop.Prop.Value;
             }

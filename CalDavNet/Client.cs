@@ -31,7 +31,7 @@ public class Client
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries.FirstOrDefault() is MultistatusEntry entry
-            && entry.Properties.TryGetValue(XNames.CurrentUserPrincipal, out var prop) && prop.IsSuccessful
+            && entry.Properties.TryGetValue(XNames.CurrentUserPrincipal, out var prop) && prop.IsSuccessStatusCode
             ? prop.Prop.Value
             : null;
     }
@@ -52,7 +52,7 @@ public class Client
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
-        return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessful
+        return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessStatusCode
             ? new Principal(entry)
             : null;
     }
@@ -78,7 +78,7 @@ public class Client
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries
-            .Where(e => e.IsCalendar && e.IsSuccessful)
+            .Where(e => e.IsCalendar && e.IsSuccessStatusCode)
             .Select(e => new Calendar(e))
             .ToList();
     }
@@ -104,7 +104,7 @@ public class Client
 
         // Only if success, result not empty and has d:resource-type with d:calendar child
         if (response.Entries.FirstOrDefault() is MultistatusEntry entry &&
-            entry.IsCalendar && entry.IsSuccessful)
+            entry.IsCalendar && entry.IsSuccessStatusCode)
         {
             return new Calendar(entry);
         }
@@ -149,7 +149,7 @@ public class Client
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.Entries
-            .Where(e => e.IsSuccessful)
+            .Where(e => e.IsSuccessStatusCode)
             .Select(e => new Event(e))
             .ToList();
     }
@@ -173,7 +173,7 @@ public class Client
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
-        return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessful
+        return response.Entries.FirstOrDefault() is MultistatusEntry entry && entry.IsSuccessStatusCode
             ? new Event(entry)
             : null;
     }
@@ -249,7 +249,7 @@ public class Client
     /// </summary>
     /// <param name="href">Folder href (e.g. /calendars/john@mail.com/events-27560559/)</param>
     /// <returns></returns>
-    public async Task<(List<EntityChange> ItemChanges, string SyncToken)> SyncFolderItemsAsync(string href, string syncToken,
+    public async Task<(List<SyncItem> ItemChanges, string SyncToken)> SyncFolderItemsAsync(string href, string syncToken,
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(CalDavClient.Report, href)
@@ -262,7 +262,7 @@ public class Client
 
         var response = await _client.SendForMultiResponseAsync(request, cancellationToken).ConfigureAwait(false);
 
-        return (response.Entries.Select(x => new EntityChange(x))
+        return (response.Entries.Select(x => new SyncItem(x))
             .ToList(), response.SyncToken!);
     }
 }

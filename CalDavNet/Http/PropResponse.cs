@@ -7,5 +7,5 @@ public record PropResponse(XElement prop, int statusCode)
     public readonly XElement Prop = prop;
     public readonly int StatusCode = statusCode;
 
-    public bool IsSuccessful => StatusCode >= 200 && StatusCode <= 299;
+    public bool IsSuccessStatusCode => StatusCode >= 200 && StatusCode <= 299;
 }

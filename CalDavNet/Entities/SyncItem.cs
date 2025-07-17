@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public class EntityChange : IEntity
+public class SyncItem
 {
     private string? _etag;
 
@@ -16,7 +16,7 @@ public class EntityChange : IEntity
         {
             if (_etag is null
                 && Properties.TryGetValue(XNames.GetEtag, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _etag = prop.Prop.Value;
             }
@@ -27,11 +27,11 @@ public class EntityChange : IEntity
 
     public IReadOnlyDictionary<XName, PropResponse> Properties { get; }
 
-    public bool IsDeleted => StatusCode == 404;
+    public bool IsDeleted => StatusCode == 404 || StatusCode == 410;
 
-    public bool IsSuccessful => StatusCode >= 200 && StatusCode <= 299;
+    public bool IsSuccessStatusCode => StatusCode >= 200 && StatusCode <= 299;
 
-    public EntityChange(MultistatusEntry entry)
+    public SyncItem(MultistatusEntry entry)
     {
         Href = entry.Href;
         StatusCode = entry.StatusCode;

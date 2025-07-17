@@ -5,7 +5,7 @@ using Ical.Net.Serialization;
 
 namespace CalDavNet;
 
-public class Calendar : IEntity
+public class Calendar
 {
     internal static readonly CalendarSerializer CalendarSerializer = new CalendarSerializer();
 
@@ -24,7 +24,7 @@ public class Calendar : IEntity
         {
             if (_displayName is null
                 && Properties.TryGetValue(XNames.DisplayName, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _displayName = prop.Prop.Value;
             }
@@ -39,7 +39,7 @@ public class Calendar : IEntity
         {
             if (_description is null
                 && Properties.TryGetValue(XNames.CalendarDescription, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _description = prop.Prop.Value;
             }
@@ -54,7 +54,7 @@ public class Calendar : IEntity
         {
             if (_color is null
                 && Properties.TryGetValue(XNames.CalendarColor, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _color = prop.Prop.Value;
             }
@@ -69,7 +69,7 @@ public class Calendar : IEntity
         {
             if (_ctag is null
                 && Properties.TryGetValue(XNames.GetCtag, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _ctag = prop.Prop.Value;
             }
@@ -84,7 +84,7 @@ public class Calendar : IEntity
         {
             if (_syncToken is
                 null && Properties.TryGetValue(XNames.SyncToken, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _syncToken = prop.Prop.Value;
             }
@@ -99,7 +99,7 @@ public class Calendar : IEntity
         {
             if (_supportedCalendarComponentSet == CalendarComponent.None
                 && Properties.TryGetValue(XNames.SupportedCalendarComponentSet, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 foreach (var comp in prop.Prop.Elements(XNames.Comp))
                 {
@@ -175,7 +175,7 @@ public class Calendar : IEntity
         return client.GetEventAsync(Href, eventHref, cancellationToken);
     }
 
-    public Task<(List<EntityChange> ItemChanges, string SyncToken)> SyncItemsAsync(Client client, string syncToken, CancellationToken cancellationToken = default)
+    public Task<(List<SyncItem> ItemChanges, string SyncToken)> SyncItemsAsync(Client client, string syncToken, CancellationToken cancellationToken = default)
     {
         return client.SyncFolderItemsAsync(Href, syncToken, cancellationToken);
     }

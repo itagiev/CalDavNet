@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace CalDavNet;
 
-public class Event : IEntity
+public class Event
 {
     private string? _etag;
     private string? _calendarData;
@@ -13,7 +13,7 @@ public class Event : IEntity
         {
             if (_etag is null &&
                 Properties.TryGetValue(XNames.GetEtag, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _etag = prop.Prop.Value;
             }
@@ -28,7 +28,7 @@ public class Event : IEntity
         {
             if (_calendarData is null &&
                 Properties.TryGetValue(XNames.CalendarData, out var prop)
-                && prop.IsSuccessful)
+                && prop.IsSuccessStatusCode)
             {
                 _calendarData = prop.Prop.Value;
             }
