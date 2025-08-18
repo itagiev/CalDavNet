@@ -57,7 +57,7 @@ public static class BodyHelper
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), propfind);
     }
 
-    public static XDocument BuildSyncCollection(string syncToken)
+    public static XDocument BuildSyncCollection(string? syncToken = null)
     {
         var syncCollection = new XElement(XNames.SyncCollection,
             new XAttribute(XNamespace.Xmlns + Constants.Dav.Prefix, Constants.Dav.Namespace),

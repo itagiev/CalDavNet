@@ -175,9 +175,10 @@ public class Calendar
         return client.GetEventAsync(Href, eventHref, cancellationToken);
     }
 
-    public Task<(List<SyncItem> ItemChanges, string SyncToken)> SyncItemsAsync(Client client, string syncToken, CancellationToken cancellationToken = default)
+    public Task<SyncItemCollection> SyncItemsAsync(Client client, string? syncToken,
+        CancellationToken cancellationToken = default)
     {
-        return client.SyncFolderItemsAsync(Href, syncToken, cancellationToken);
+        return client.SyncCalendarItemsAsync(Href, syncToken, cancellationToken);
     }
 
     public Task<bool> DeleteAsync(Client client, CancellationToken cancellationToken = default)
