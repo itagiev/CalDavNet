@@ -53,16 +53,19 @@ public class Event
         if (!string.IsNullOrEmpty(CalendarData))
         {
             ICalCalendar = Ical.Net.Calendar.Load(CalendarData);
-            ICalEvent = ICalCalendar.Events.SingleOrDefault();
+            if (ICalCalendar is not null)
+            {
+                ICalEvent = ICalCalendar.Events.SingleOrDefault();
+            }
         }
     }
 
     public Task<bool> UpdateAsync(Client client, CancellationToken cancellationToken = default)
     {
         if (Etag is null || CalendarData is null)
-            throw new InvalidOperationException("Event data was not loaded.");
+            throw new InvalidOperationException("Etag or calendar data was not loaded.");
 
-        return client.UpdateEventAsync(Href, Etag, Serialize(), cancellationToken);
+        return client.UpdateEventAsync(Href, Etag, Serialize()!, cancellationToken);
     }
 
     public Task<bool> DeleteAsync(Client client, CancellationToken cancellationToken = default)
@@ -73,7 +76,7 @@ public class Event
         return client.DeleteAsync(Href, Etag, cancellationToken);
     }
 
-    public string Serialize()
+    public string? Serialize()
     {
         return Calendar.CalendarSerializer.SerializeToString(ICalCalendar);
     }

@@ -248,9 +248,9 @@ class Program
 
         Console.WriteLine("Creating event...");
 
-        var result = await calendar.CreateEventAsync(client, calendarEvent);
+        var @event = await calendar.CreateEventAsync(client, calendarEvent);
 
-        if (result)
+        if (@event is not null)
         {
             Console.WriteLine($"Event created");
         }
@@ -258,8 +258,6 @@ class Program
         {
             Console.WriteLine("Error occurred while creating event");
         }
-
-        var @event = await calendar.GetEventAsync(client, $"{calendar.Href}{calendarEvent.Uid}.ics");
 
         ArgumentNullException.ThrowIfNull(@event?.ICalEvent);
 
@@ -270,7 +268,7 @@ class Program
         Console.WriteLine("Updating event...");
 
         @event.ICalEvent.Summary = "New summary";
-        result = await @event.UpdateAsync(client);
+        var result = await @event.UpdateAsync(client);
 
         if (result)
         {

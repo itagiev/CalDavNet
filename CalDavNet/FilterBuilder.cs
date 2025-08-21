@@ -62,7 +62,7 @@ public class CompFilterBuilder
         if (negate)
             textMatch.SetAttributeValue("negate", "yes");
 
-        if (!string.IsNullOrWhiteSpace(collation))
+        if (!string.IsNullOrEmpty(collation))
             textMatch.SetAttributeValue("collation", collation);
 
         var propFilter = new XElement(XNames.PropFilter, new XAttribute("name", propName), textMatch);

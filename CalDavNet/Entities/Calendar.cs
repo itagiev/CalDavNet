@@ -144,18 +144,30 @@ public class Calendar
         _calendar = new Ical.Net.Calendar();
     }
 
-    public Task<bool> CreateEventAsync(Client client, CalendarEvent @event, CancellationToken cancellationToken = default)
+    public async Task<Event?> CreateEventAsync(Client client, CalendarEvent calendarEvent, CancellationToken cancellationToken = default)
     {
         _calendar.Events.Clear();
-        _calendar.Events.Add(@event);
-        var eventHref = $"{Href}{@event.Uid}.ics";
-        return client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(_calendar), cancellationToken);
+        _calendar.Events.Add(calendarEvent);
+
+        var eventHref = $"{Href}{calendarEvent.Uid}.ics";
+
+        var createResult = await client.CreateEventAsync(eventHref,
+            CalendarSerializer.SerializeToString(_calendar)!,
+            cancellationToken);
+
+        return await GetEventAsync(client, eventHref, cancellationToken);
     }
 
-    public Task<bool> CreateEventAsync(Client client, Ical.Net.Calendar calendar, CancellationToken cancellationToken = default)
+    public async Task<Event?> CreateEventAsync(Client client, Ical.Net.Calendar calendar, CancellationToken cancellationToken = default)
     {
-        var eventHref = $"{Href}{calendar.Events[0].Uid}.ics";
-        return client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(calendar), cancellationToken);
+        var calendarEvent = calendar.Events[0]!;
+        var eventHref = $"{Href}{calendarEvent.Uid}.ics";
+
+        var createResult = await client.CreateEventAsync(eventHref,
+            CalendarSerializer.SerializeToString(calendar)!,
+            cancellationToken);
+
+        return await GetEventAsync(client, eventHref, cancellationToken);
     }
 
     public bool IsComponentSupported(CalendarComponent component)
