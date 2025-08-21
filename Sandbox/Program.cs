@@ -133,21 +133,20 @@ class Program
         //    Console.WriteLine($"{e.Href} - {e.Etag}");
         //}
 
-        //Console.WriteLine();
-        //Console.WriteLine("-----------------------------------------");
-        //Console.WriteLine("Processing mailbox logic\n");
-        //await ProcessMailboxLogic(client, principal.CalendarHomeSet);
+        Console.WriteLine();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("Processing mailbox logic\n");
+        await ProcessMailboxLogic(client, principal.CalendarHomeSet);
 
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
         //Console.WriteLine("Processing calendar logic\n");
         //await ProcessCalendarLogic(client, defaultCalendar);
 
-        Console.WriteLine();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("Processing event logic\n");
-        await ProcessEventLogic(client, defaultCalendar);
-        
+        //Console.WriteLine();
+        //Console.WriteLine("-----------------------------------------");
+        //Console.WriteLine("Processing event logic\n");
+        //await ProcessEventLogic(client, defaultCalendar);
     }
 
     static async Task ProcessMailboxLogic(Client client, string calendarHomeSet)
@@ -171,8 +170,12 @@ class Program
             }
         }
 
-        result = await myCalendar.DeleteAsync(client);
+        // Updating
+        result = await myCalendar.UpdateAsync(client, BodyHelper.BuildPropertyUpdate("Super new name"));
+        Console.WriteLine(result);
 
+        // Deleting
+        result = await myCalendar.DeleteAsync(client);
         Console.WriteLine(result);
     }
 

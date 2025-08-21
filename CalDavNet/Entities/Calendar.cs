@@ -148,7 +148,6 @@ public class Calendar
     {
         _calendar.Events.Clear();
         _calendar.Events.Add(@event);
-
         var eventHref = $"{Href}{@event.Uid}.ics";
         return client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(_calendar), cancellationToken);
     }
@@ -183,6 +182,14 @@ public class Calendar
         CancellationToken cancellationToken = default)
     {
         return client.SyncCalendarItemsAsync(Href, syncToken, cancellationToken);
+    }
+
+    public Task<bool> UpdateAsync(Client client, XDocument body, CancellationToken cancellationToken = default)
+    {
+        if (Ctag is null)
+            throw new InvalidOperationException("Ctag was not loaded.");
+
+        return client.UpdateCalendarAsync(Href, Ctag, body, cancellationToken);
     }
 
     public Task<bool> DeleteAsync(Client client, CancellationToken cancellationToken = default)

@@ -130,6 +130,20 @@ public class Client
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<bool> UpdateCalendarAsync(string href, string ctag, XDocument body, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage(CalDavClient.Proppatch, href)
+        {
+            Content = body.ToStringContent()
+        }
+        .WithEtag(ctag)
+        .WithPrefer("return=representation")
+        .WithBasicAuthorization(_token);
+
+        var response = await _client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        return response.IsSuccessStatusCode;
+    }
+
     /// <summary>
     /// Gets event collection within calendar.
     /// </summary>
@@ -231,12 +245,12 @@ public class Client
     /// Deletes resource on caldav server (e.g. calendar or event).
     /// </summary>
     /// <param name="href">Resource href (e.g. /calendars/john@mail.com/events-27560559/oeibm394kvocows3lgjn.ics).</param>
-    /// <param name="etagOrCtag">Resource version "version".</param>
-    public async Task<bool> DeleteAsync(string href, string etagOrCtag,
+    /// <param name="etag">Resource version "version".</param>
+    public async Task<bool> DeleteAsync(string href, string etag,
         CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Delete, href)
-            .WithEtag(etagOrCtag)
+            .WithEtag(etag)
             .WithPrefer("return-minimal")
             .WithBasicAuthorization(_token);
 
