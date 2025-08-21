@@ -126,12 +126,12 @@ class Program
         }
 
         // TEST: Sync
-        var syncItemCollection = await defaultCalendar.SyncItemsAsync(client, null);
+        //var syncItemCollection = await defaultCalendar.SyncItemsAsync(client, null);
 
-        foreach (var e in syncItemCollection)
-        {
-            Console.WriteLine($"{e.Href} - {e.Etag}");
-        }
+        //foreach (var e in syncItemCollection)
+        //{
+        //    Console.WriteLine($"{e.Href} - {e.Etag}");
+        //}
 
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
@@ -143,21 +143,22 @@ class Program
         //Console.WriteLine("Processing calendar logic\n");
         //await ProcessCalendarLogic(client, defaultCalendar);
 
-        //Console.WriteLine();
-        //Console.WriteLine("-----------------------------------------");
-        //Console.WriteLine("Processing event logic\n");
-        //await ProcessEventLogic(client, defaultCalendar);
+        Console.WriteLine();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("Processing event logic\n");
+        await ProcessEventLogic(client, defaultCalendar);
+        
     }
 
     static async Task ProcessMailboxLogic(Client client, string calendarHomeSet)
     {
         string calendarName = "Haha calendar";
-        var body = BodyHelper.BuildMkcalendar(calendarName, Constants.Comp.VEVENT);
+        var body = BodyHelper.BuildMkcalendar(calendarName, Constants.Comp.VEVENT, Guid.NewGuid().ToString());
         var result = await client.CreateCalendarAsync(calendarHomeSet, body);
         Console.WriteLine(result);
 
         var calendars = await client.GetCalendarsAsync(calendarHomeSet, BodyHelper.BuildPropfind(
-            [XNames.ResourceType, XNames.GetCtag, XNames.SyncToken, XNames.SupportedCalendarComponentSet, XNames.DisplayName]));
+            [XNames.ResourceType, XNames.SupportedCalendarComponentSet, XNames.GetCtag, XNames.DisplayName, XNames.Comment]));
 
         Calendar myCalendar = null!;
 
@@ -169,8 +170,6 @@ class Program
                 break;
             }
         }
-
-        Console.WriteLine(result);
 
         result = await myCalendar.DeleteAsync(client);
 

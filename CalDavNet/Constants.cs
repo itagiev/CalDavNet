@@ -14,6 +14,7 @@ public static class Constants
         public const string CreationDate = "creationdate";
         public const string CurrentUserPrincipal = "current-user-principal";
         public const string DisplayName = "displayname";
+        public const string Comment = "comment";
         public const string GetContentType = "getcontenttype";
         public const string GetEtag = "getetag";
         public const string GetLastModified = "getlastmodified";
@@ -144,6 +145,8 @@ public static class XNames
     public static XName CurrentUserPrincipal => XName.Get(Constants.Dav.CurrentUserPrincipal, Constants.Dav.Namespace);
 
     public static XName DisplayName => XName.Get(Constants.Dav.DisplayName, Constants.Dav.Namespace);
+
+    public static XName Comment => XName.Get(Constants.Dav.Comment, Constants.Dav.Namespace);
 
     public static XName GetContentType => XName.Get(Constants.Dav.GetContentType, Constants.Dav.Namespace);
 

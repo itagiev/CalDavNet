@@ -142,17 +142,21 @@ public class Calendar
         Href = entry.Href;
         Properties = entry.Properties;
         _calendar = new Ical.Net.Calendar();
-        _calendar.AddTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
     }
 
-    public Task<bool> CreateEventAsync(Client client, CalendarEvent @event,
-        CancellationToken cancellationToken = default)
+    public Task<bool> CreateEventAsync(Client client, CalendarEvent @event, CancellationToken cancellationToken = default)
     {
         _calendar.Events.Clear();
         _calendar.Events.Add(@event);
 
         var eventHref = $"{Href}{@event.Uid}.ics";
         return client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(_calendar), cancellationToken);
+    }
+
+    public Task<bool> CreateEventAsync(Client client, Ical.Net.Calendar calendar, CancellationToken cancellationToken = default)
+    {
+        var eventHref = $"{Href}{calendar.Events[0].Uid}.ics";
+        return client.CreateEventAsync(eventHref, CalendarSerializer.SerializeToString(calendar), cancellationToken);
     }
 
     public bool IsComponentSupported(CalendarComponent component)
