@@ -138,11 +138,13 @@ public static class BodyHelper
         return new XDocument(new XDeclaration("1.0", "UTF-8", null), mkcalendar);
     }
 
-    public static XDocument BuildPropertyUpdate(string displayName, string? description = null,
+    public static XDocument BuildPropertyUpdate(string? displayName = null, string? description = null,
         string? color = null)
     {
-        var prop = new XElement(XNames.Prop,
-            new XElement(XNames.DisplayName, displayName));
+        var prop = new XElement(XNames.Prop);
+
+        if (!string.IsNullOrEmpty(displayName))
+            prop.Add(new XElement(XNames.DisplayName, displayName));
 
         if (!string.IsNullOrEmpty(description))
             prop.Add(new XElement(XNames.CalendarDescription, description));
