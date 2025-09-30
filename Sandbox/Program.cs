@@ -2,6 +2,7 @@ using CalDavNet;
 
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
+using Ical.Net.Serialization;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -44,6 +45,38 @@ class Program
         //    .AddTextMatch(Constants.PropFilter.SUMMARY, "Meeting", false, "i;unicode-casemap");
 
         //Console.WriteLine(filterBuilder.ToXElement.ToString());
+
+        #endregion
+
+        #region All day event test
+
+        //DateTime start = new DateTime(2025, 9, 3, 0, 0, 0, DateTimeKind.Local);
+        //DateTime end = new DateTime(2025, 9, 5, 0, 0, 0, DateTimeKind.Local);
+
+
+        //Console.WriteLine(start);
+        //Console.WriteLine(DateOnly.FromDateTime(start));
+        //Console.WriteLine(DateOnly.FromDateTime(start.ToUniversalTime()));
+        //Console.WriteLine(new CalDateTime(DateOnly.FromDateTime(start)));
+        //Console.WriteLine(new CalDateTime(DateOnly.FromDateTime(start.ToUniversalTime())));
+
+        //CalendarSerializer serializer = new CalendarSerializer();
+        //Ical.Net.Calendar cal = new();
+
+        //var calEvent = new CalendarEvent
+        //{
+        //    Summary = "Ev",
+        //    Start = new CalDateTime(start.ToUniversalTime()),
+        //    End = new CalDateTime(end.ToUniversalTime())
+        //};
+        //Console.WriteLine(serializer.SerializeToString(calEvent));
+
+        //cal.Events.Add(calEvent);
+        //Console.WriteLine(serializer.SerializeToString(cal));
+
+        //cal.AddTimeZone(TimeZoneInfo.Local);
+        //cal.AddTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time"));
+        //Console.WriteLine(serializer.SerializeToString(cal));
 
         #endregion
     }
@@ -133,15 +166,15 @@ class Program
         //    Console.WriteLine($"{e.Href} - {e.Etag}");
         //}
 
-        Console.WriteLine();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("Processing mailbox logic\n");
-        await ProcessMailboxLogic(client, principal.CalendarHomeSet);
-
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
-        //Console.WriteLine("Processing calendar logic\n");
-        //await ProcessCalendarLogic(client, defaultCalendar);
+        //Console.WriteLine("Processing mailbox logic\n");
+        //await ProcessMailboxLogic(client, principal.CalendarHomeSet);
+
+        Console.WriteLine();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("Processing calendar logic\n");
+        await ProcessCalendarLogic(client, defaultCalendar);
 
         //Console.WriteLine();
         //Console.WriteLine("-----------------------------------------");
